@@ -9,7 +9,14 @@ export interface RunOutput extends QueryOutput {
   ms: number;
 }
 
-export type TableSchema = { name: string; columns: { name: string; type: string }[] };
+export interface ColumnSchema {
+  name: string;
+  type: string;
+  pk: boolean; // part of the table's primary key
+  references?: { table: string; column: string }; // set when the column is a foreign key
+}
+
+export type TableSchema = { name: string; columns: ColumnSchema[] };
 
 export class Engine {
   private pristine = new Map<string, Uint8Array>();
@@ -56,13 +63,18 @@ export class Engine {
     const db = this.open(datasetId, seed);
     try {
       const tables = db.exec("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")[0]?.values ?? [];
-      return tables.map(([name]) => ({
-        name: String(name),
-        columns: (db.exec(`PRAGMA table_info("${String(name)}")`)[0]?.values ?? []).map((c) => ({
-          name: String(c[1]),
-          type: String(c[2]),
-        })),
-      }));
+      return tables.map(([tableName]) => {
+        const name = String(tableName);
+        // foreign_key_list rows: id, seq, table, from, to, ...
+        const fks = db.exec(`PRAGMA foreign_key_list("${name}")`)[0]?.values ?? [];
+        const references = new Map(fks.map((f) => [String(f[3]), { table: String(f[2]), column: f[4] === null ? '' : String(f[4]) }]));
+        // table_info rows: cid, name, type, notnull, dflt_value, pk
+        const columns = (db.exec(`PRAGMA table_info("${name}")`)[0]?.values ?? []).map((c): ColumnSchema => {
+          const ref = references.get(String(c[1]));
+          return { name: String(c[1]), type: String(c[2]), pk: Number(c[5]) > 0, ...(ref && { references: ref }) };
+        });
+        return { name, columns };
+      });
     } finally {
       db.close();
     }

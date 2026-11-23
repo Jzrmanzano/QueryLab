@@ -5,6 +5,7 @@ import initSqlJs from 'sql.js';
 import { Engine } from '../engine/core';
 import { exercises, lessons, modules } from './loader';
 import { datasetIds, loadDataset } from './datasets';
+import { GUIDE_LESSON_IDS } from '../pages/Guide';
 
 let engine: Engine;
 let datasets: Record<string, string>;
@@ -43,6 +44,27 @@ describe('content', () => {
   );
   it.each(examples)('%s runs', (_name, dataset, sql) => {
     expect(() => engine.run(dataset, datasets[dataset], sql)).not.toThrow();
+  });
+
+  it('reports primary keys and foreign keys in the schema', () => {
+    const col = (dataset: string, table: string, column: string) =>
+      engine.schema(dataset, datasets[dataset]).find((t) => t.name === table)?.columns.find((c) => c.name === column);
+
+    expect(col('store', 'customers', 'id')).toMatchObject({ pk: true });
+    expect(col('store', 'orders', 'customer_id')).toMatchObject({ pk: false, references: { table: 'customers', column: 'id' } });
+    // A composite key: both columns are part of the primary key, and both are foreign keys.
+    expect(col('store', 'order_items', 'order_id')).toMatchObject({ pk: true, references: { table: 'orders' } });
+    expect(col('store', 'order_items', 'product_id')).toMatchObject({ pk: true, references: { table: 'products' } });
+    // A self-reference.
+    expect(col('chinook', 'Employee', 'ReportsTo')).toMatchObject({ references: { table: 'Employee', column: 'EmployeeId' } });
+    // One flat table: no foreign keys at all.
+    const penguins = engine.schema('penguins', datasets.penguins);
+    expect(penguins.flatMap((t) => t.columns).some((c) => c.references)).toBe(false);
+  });
+
+  it('links the schema guide only to lessons that exist', () => {
+    const ids = new Set(lessons.map((l) => l.id));
+    for (const id of GUIDE_LESSON_IDS) expect(ids, id).toContain(id);
   });
 
   it('grades a wrong answer as wrong', () => {

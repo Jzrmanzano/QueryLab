@@ -7,6 +7,7 @@ import { Playground } from './pages/Playground';
 import { ProgressPage } from './pages/ProgressPage';
 import { NotFound } from './pages/NotFound';
 import { Privacy } from './pages/Privacy';
+import { Guide } from './pages/Guide';
 
 function Header() {
   return (
@@ -19,6 +20,7 @@ function Header() {
       </Link>
       <nav>
         <NavLink to="/learn">Learn</NavLink>
+        <NavLink to="/guide">Guide</NavLink>
         <NavLink to="/playground">Playground</NavLink>
         <NavLink to="/progress">Progress</NavLink>
       </nav>
@@ -38,6 +40,7 @@ export function App() {
             <Route path="/learn/:module/:lesson" element={<LessonPage />} />
             <Route path="/playground" element={<Playground />} />
             <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/guide" element={<Guide />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

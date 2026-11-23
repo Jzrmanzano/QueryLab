@@ -65,5 +65,5 @@ content/modules/       module.yaml, lessons (.md), exercises (.exercises.yaml)
 src/engine/            compare.ts (pure grading), core.ts (sql.js), sql.worker.ts, client.ts
 src/content/           loader.ts, datasets.ts, content.test.ts
 src/components/        SqlEditor, ResultsTable, SchemaPanel, Workspace, LessonBody
-src/pages/             Landing, ModuleMap, LessonPage, Playground, ProgressPage, Privacy
+src/pages/             Landing, ModuleMap, LessonPage, Guide (schema guide), Playground, ProgressPage, Privacy
 ```
