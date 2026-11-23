@@ -1,77 +1,66 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
-import { lessons, lessonPath, modules, exercises } from '../content/loader';
+import { Workspace } from '../components/Workspace';
+import { Mark } from '../components/Mark';
+import { exercises, lessonPath, lessons, modules } from '../content/loader';
+import { useProgress } from '../lib/progress';
 
-// The hero shows a real query from the Filtering module and the rows it returns from the school dataset.
-const heroRows = [
-  ['EE 101', 'Circuits 1', 4],
-  ['BIO 101', 'General Biology', 4],
-];
+// A real question about the school dataset, answered live on the home page.
+const DEMO_SQL = `SELECT c.name AS college, COUNT(*) AS students
+FROM students s
+JOIN colleges c ON c.id = s.college_id
+GROUP BY c.name
+ORDER BY students DESC;`;
 
+/** Same arrangement as a lesson: the pad on the left, the screen on the right. */
 export function Landing() {
+  const [sql, setSql] = useState(DEMO_SQL);
+  const { rows } = useProgress();
   const first = lessons[0];
+  const allSolved = (ids: string[]) => ids.length > 0 && ids.every((id) => rows[id]?.status === 'solved');
+
   return (
     <div className="landing">
-      <section className="hero">
-        <div className="hero-copy">
-          <h1>Learn SQL by asking real questions of real data.</h1>
-          <p className="lead">
-            QueryLab runs a real database right in your browser. Read a short lesson, write a query, and know straight away whether it's right.
-          </p>
-          <div className="hero-actions">
-            {first && (
-              <Link className="btn primary big" to={lessonPath(first)}>
-                Start the first lesson
-              </Link>
-            )}
-            <Link className="btn big" to="/playground">
-              Open the playground
+      <div className="page">
+        <h1>Learn SQL by asking real questions of real data.</h1>
+        <p className="lead">
+          Each lesson explains one idea in a few minutes. Then you write queries against a real database in your
+          browser, and QueryLab checks each answer the moment you submit it.
+        </p>
+        <div className="actions">
+          {first && (
+            <Link className="btn primary" to={lessonPath(first)}>
+              Start lesson 1
             </Link>
-          </div>
+          )}
+          <Link className="btn" to="/learn">
+            See all lessons
+          </Link>
         </div>
+        <p>Free, with no account to create. Your progress is saved in this browser.</p>
 
-        <figure className="hero-demo" aria-label="Example query and result">
-          <pre className="hero-query">
-            <code>
-              {'SELECT code, title, units\nFROM courses\nWHERE units > 3;'}
-            </code>
-          </pre>
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>code</th>
-                <th>title</th>
-                <th>units</th>
-              </tr>
-            </thead>
-            <tbody>
-              {heroRows.map((r) => (
-                <tr key={r[0]}>
-                  <td>{r[0]}</td>
-                  <td>{r[1]}</td>
-                  <td className="num">{r[2]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <figcaption className="verdict pass">
-            <strong>Correct.</strong> Your query returns exactly the expected result.
-          </figcaption>
-        </figure>
-      </section>
-
-      <section className="landing-path">
-        <h2>
-          {modules.length} modules, {exercises.length} exercises, no setup
+        <h2 id="outline-heading">
+          {modules.length} modules, {lessons.length} lessons, {exercises.length} exercises
         </h2>
-        <ol className="path">
-          {modules.map((m) => (
-            <li key={m.slug}>
-              <Link to={lessonPath(m.lessons[0])}>{m.title}</Link>
-              <span>{m.summary}</span>
-            </li>
-          ))}
+        <ol className="toc" aria-labelledby="outline-heading">
+          {modules.map((m, i) => {
+            const done = allSolved(m.lessons.flatMap((l) => l.exercises.map((e) => e.id)));
+            return (
+              <li key={m.slug} className="in-margin">
+                <Mark n={i + 1} solved={done} label={done ? 'Module complete.' : undefined} />
+                <h3>
+                  <Link to={lessonPath(m.lessons[0])}>{m.title}</Link>
+                </h3>
+                <p className="summary">{m.summary}</p>
+              </li>
+            );
+          })}
         </ol>
-        <p className="meta">Free to use, no account needed. Your progress is saved in your browser.</p>
+      </div>
+
+      <section className="screen hero-screen" aria-labelledby="demo-heading">
+        <h2 id="demo-heading">This query is running on the school database. Change it and press Run.</h2>
+        <Workspace datasetId="school" value={sql} onChange={setSql} autoRun />
       </section>
     </div>
   );

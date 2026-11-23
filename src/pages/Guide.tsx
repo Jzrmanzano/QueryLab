@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { KeyBadges } from '../components/SchemaPanel';
 import { lessonPath, lessons } from '../content/loader';
 import { getSchema } from '../engine/client';
+import { highlightSql } from '../lib/highlight';
 import type { ColumnSchema, TableSchema } from '../engine/core';
 
 /** Lessons the guide links to. A test checks that each id still exists. */
@@ -52,7 +53,7 @@ function Connector({ left, right }: { left: string; right: string }) {
 
 function Figure({ caption, children }: { caption: ReactNode; children: ReactNode }) {
   return (
-    <figure className="schema-fig">
+    <figure className="schema-fig aside">
       <div className="fig-row">{children}</div>
       <figcaption>{caption}</figcaption>
     </figure>
@@ -62,7 +63,7 @@ function Figure({ caption, children }: { caption: ReactNode; children: ReactNode
 function Snippet({ children }: { children: string }) {
   return (
     <pre className="snippet">
-      <code>{children}</code>
+      <code dangerouslySetInnerHTML={{ __html: highlightSql(children) }} />
     </pre>
   );
 }
@@ -150,84 +151,107 @@ function DatasetExplorer({ id, blurb }: { id: string; blurb: string }) {
 
 // ---------- the page ----------
 
+const SECTIONS = [
+  ['blocks', 'The building blocks'],
+  ['reading', 'Reading a schema before you query'],
+  ['patterns', 'How tables connect'],
+  ['naming', 'Same ideas, different naming styles'],
+  ['datasets', "Explore QueryLab's datasets"],
+] as const;
+
+/** Running text sits on the left at reading width; the figure that goes with it sits beside it. */
 export function Guide() {
   return (
     <div className="page guide">
-      <h1>How database schemas work</h1>
-      <p className="lead">
-        A schema is a database's blueprint: which tables exist, what columns each one has, and how the tables connect.
-        Reading it first is the fastest way to write a query that works. Every lesson's <strong>Schema</strong> tab shows
-        the schema of the data you're querying.
-      </p>
+      <header className="sheet-head">
+        <div>
+          <h1>How database schemas work</h1>
+          <p className="lead">
+            A schema is a database's blueprint: which tables exist, what columns each one has, and how the tables
+            connect. Reading it first is the fastest way to write a query that works. Every lesson's{' '}
+            <strong>Schema</strong> tab shows the schema of the data you're querying.
+          </p>
+        </div>
+        <nav className="sheet-aside contents" aria-labelledby="contents-heading">
+          <h2 id="contents-heading">In this guide</h2>
+          <ol>
+            {SECTIONS.map(([id, title]) => (
+              <li key={id}>
+                <a href={`#${id}`}>{title}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </header>
 
       <section aria-labelledby="blocks">
         <h2 id="blocks">The building blocks</h2>
-        <div className="prose">
-          <p>
-            A <strong>table</strong> holds one kind of thing: students, orders, tracks. Each <strong>row</strong> is one
-            of those things, and each <strong>column</strong> is one fact about it, with a type such as{' '}
-            <code>INTEGER</code>, <code>REAL</code> (a decimal number) or <code>TEXT</code>.
-          </p>
-          <p>
-            A <strong>primary key</strong> <abbr className="key-badge pk">PK</abbr> is a column whose value is different
-            in every row, so it identifies exactly one row. It's usually called <code>id</code>.
-          </p>
-          <p>
-            A <strong>foreign key</strong> <abbr className="key-badge fk">FK</abbr> is a column that stores another
-            table's primary key. It's how one row points to a row in another table. Here's a real slice of the{' '}
-            <code>store</code> dataset:
-          </p>
-        </div>
-
-        <div className="key-demo">
-          <div>
-            <h3>customers</h3>
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th>id <abbr className="key-badge pk">PK</abbr></th>
-                  <th>name</th>
-                  <th>city</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td className="num tint-1">1</td><td>Aurora Shop</td><td>San Fernando</td></tr>
-                <tr><td className="num tint-2">2</td><td>Benito Dela Paz</td><td>Laoag</td></tr>
-                <tr><td className="num tint-3">3</td><td>Cecilia Ong</td><td>Manila</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
-            <h3>orders</h3>
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th>id <abbr className="key-badge pk">PK</abbr></th>
-                  <th>customer_id <abbr className="key-badge fk">FK</abbr></th>
-                  <th>ordered_on</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td className="num">4</td><td className="num tint-1">1</td><td>2025-01-28</td></tr>
-                <tr><td className="num">5</td><td className="num tint-3">3</td><td>2025-01-24</td></tr>
-                <tr><td className="num">9</td><td className="num tint-1">1</td><td>2025-01-17</td></tr>
-                <tr><td className="num">20</td><td className="num tint-2">2</td><td>2025-03-27</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="prose">
-          <p>
-            Orders 4 and 9 both have <code>customer_id</code> 1, so both belong to Aurora Shop. A join follows exactly
-            that pointer:
-          </p>
-          <Snippet>{`SELECT o.id, o.ordered_on, c.name
+        <div className="split">
+          <div className="prose">
+            <p>
+              A <strong>table</strong> holds one kind of thing: students, orders, tracks. Each <strong>row</strong> is
+              one of those things, and each <strong>column</strong> is one fact about it, with a type such as{' '}
+              <code>INTEGER</code>, <code>REAL</code> (a decimal number) or <code>TEXT</code>.
+            </p>
+            <p>
+              A <strong>primary key</strong> <abbr className="key-badge pk">PK</abbr> is a column whose value is
+              different in every row, so it identifies exactly one row. It's usually called <code>id</code>.
+            </p>
+            <p>
+              A <strong>foreign key</strong> <abbr className="key-badge fk">FK</abbr> is a column that stores another
+              table's primary key. It's how one row points to a row in another table. The two tables shown here are a
+              real slice of the <code>store</code> dataset, with matching colours for the same customer.
+            </p>
+            <p>
+              Orders 4 and 9 both have <code>customer_id</code> 1, so both belong to Aurora Shop. A join follows
+              exactly that pointer:
+            </p>
+            <Snippet>{`SELECT o.id, o.ordered_on, c.name
 FROM orders o
 JOIN customers c ON c.id = o.customer_id;`}</Snippet>
-          <p>
-            The <code>ON</code> line of a join almost always pairs a foreign key with the primary key it points to. Find
-            the <abbr className="key-badge fk">FK</abbr> and you've found the join.
-          </p>
+            <p>
+              The <code>ON</code> line of a join almost always pairs a foreign key with the primary key it points to.
+              Find the <abbr className="key-badge fk">FK</abbr> and you've found the join.
+            </p>
+          </div>
+
+          <div className="key-demo aside">
+            <div>
+              <h3>customers</h3>
+              <table className="grid">
+                <thead>
+                  <tr>
+                    <th>id <abbr className="key-badge pk">PK</abbr></th>
+                    <th>name</th>
+                    <th>city</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td className="num tint-1">1</td><td>Aurora Shop</td><td>San Fernando</td></tr>
+                  <tr><td className="num tint-2">2</td><td>Benito Dela Paz</td><td>Laoag</td></tr>
+                  <tr><td className="num tint-3">3</td><td>Cecilia Ong</td><td>Manila</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <h3>orders</h3>
+              <table className="grid">
+                <thead>
+                  <tr>
+                    <th>id <abbr className="key-badge pk">PK</abbr></th>
+                    <th>customer_id <abbr className="key-badge fk">FK</abbr></th>
+                    <th>ordered_on</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td className="num">4</td><td className="num tint-1">1</td><td>2025-01-28</td></tr>
+                  <tr><td className="num">5</td><td className="num tint-3">3</td><td>2025-01-24</td></tr>
+                  <tr><td className="num">9</td><td className="num tint-1">1</td><td>2025-01-17</td></tr>
+                  <tr><td className="num">20</td><td className="num tint-2">2</td><td>2025-03-27</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -254,14 +278,9 @@ JOIN customers c ON c.id = o.customer_id;`}</Snippet>
           Almost every database is built from the same handful of patterns. QueryLab's datasets include all of them.
         </p>
 
-        <article className="pattern">
-          <h3>One-to-many</h3>
-          <Figure caption="One customer has many orders; each order belongs to one customer.">
-            <TableCard name="customers" cols={[pk('id'), col('name'), col('city')]} />
-            <Connector left="one" right="many" />
-            <TableCard name="orders" cols={[pk('id'), fk('customer_id', 'customers.id'), col('ordered_on')]} />
-          </Figure>
+        <article className="pattern split">
           <div className="prose">
+            <h3>One-to-many</h3>
             <p>
               The most common pattern. The foreign key always lives on the <em>many</em> side: an order stores its
               customer's id, never the other way round, because a customer can't hold a list of order ids in one
@@ -269,21 +288,16 @@ JOIN customers c ON c.id = o.customer_id;`}</Snippet>
               students). Practise it in <LessonLink id="joins.inner">INNER JOIN</LessonLink>.
             </p>
           </div>
+          <Figure caption="One customer has many orders; each order belongs to one customer.">
+            <TableCard name="customers" cols={[pk('id'), col('name'), col('city')]} />
+            <Connector left="one" right="many" />
+            <TableCard name="orders" cols={[pk('id'), fk('customer_id', 'customers.id'), col('ordered_on')]} />
+          </Figure>
         </article>
 
-        <article className="pattern">
-          <h3>Many-to-many, through a linking table</h3>
-          <Figure caption="A student takes many courses and a course has many students. Each row of enrollments is one student in one course.">
-            <TableCard name="students" cols={[pk('id'), col('first_name')]} />
-            <Connector left="one" right="many" />
-            <TableCard
-              name="enrollments"
-              cols={[fk('student_id', 'students.id', true), fk('course_id', 'courses.id', true), col('grade')]}
-            />
-            <Connector left="many" right="one" />
-            <TableCard name="courses" cols={[pk('id'), col('code')]} />
-          </Figure>
+        <article className="pattern split">
           <div className="prose">
+            <h3>Many-to-many, through a linking table</h3>
             <p>
               Neither side can store a single pointer to the other, so a third table stores one row per pair. Its
               primary key is often the two foreign keys together (a <em>composite</em> key), which stops the same
@@ -300,10 +314,27 @@ JOIN courses c ON c.id = e.course_id;`}</Snippet>
               <LessonLink id="joins.many-tables">Joining three or more tables</LessonLink>.
             </p>
           </div>
+          <Figure caption="A student takes many courses and a course has many students. Each row of enrollments is one student in one course.">
+            <TableCard name="students" cols={[pk('id'), col('first_name')]} />
+            <Connector left="one" right="many" />
+            <TableCard
+              name="enrollments"
+              cols={[fk('student_id', 'students.id', true), fk('course_id', 'courses.id', true), col('grade')]}
+            />
+            <Connector left="many" right="one" />
+            <TableCard name="courses" cols={[pk('id'), col('code')]} />
+          </Figure>
         </article>
 
-        <article className="pattern">
-          <h3>Chains</h3>
+        <article className="pattern split">
+          <div className="prose">
+            <h3>Chains</h3>
+            <p>
+              One-to-many links often line up in a row. There's no shortcut from <code>Track</code> to{' '}
+              <code>Artist</code>: you pass through <code>Album</code>, one join per arrow. Build the query one join at
+              a time and run it after each one.
+            </p>
+          </div>
           <Figure caption="A track belongs to an album, and an album belongs to an artist.">
             <TableCard name="Track" cols={[pk('TrackId'), col('Name'), fk('AlbumId', 'Album.AlbumId')]} />
             <Connector left="many" right="one" />
@@ -311,23 +342,11 @@ JOIN courses c ON c.id = e.course_id;`}</Snippet>
             <Connector left="many" right="one" />
             <TableCard name="Artist" cols={[pk('ArtistId'), col('Name')]} />
           </Figure>
-          <div className="prose">
-            <p>
-              One-to-many links often line up in a row. There's no shortcut from <code>Track</code> to{' '}
-              <code>Artist</code>: you pass through <code>Album</code>, one join per arrow. Build the query one join at
-              a time and run it after each one.
-            </p>
-          </div>
         </article>
 
-        <article className="pattern">
-          <h3>A table that points to itself</h3>
-          <Figure caption="ReportsTo holds the EmployeeId of the employee's manager, who is a row in the same table.">
-            <TableCard name="Employee (e)" cols={[pk('EmployeeId'), col('FirstName'), fk('ReportsTo', 'Employee.EmployeeId')]} />
-            <Connector left="many" right="one" />
-            <TableCard name="Employee (m)" cols={[pk('EmployeeId'), col('FirstName')]} />
-          </Figure>
+        <article className="pattern split">
           <div className="prose">
+            <h3>A table that points to itself</h3>
             <p>
               Staff and managers, categories and subcategories, replies to comments: whenever a thing relates to
               another thing of the same kind, the foreign key points back into its own table. Query it by joining the
@@ -335,27 +354,32 @@ JOIN courses c ON c.id = e.course_id;`}</Snippet>
               <LessonLink id="joins.self">Joining a table to itself</LessonLink>.
             </p>
           </div>
+          <Figure caption="ReportsTo holds the EmployeeId of the employee's manager, who is a row in the same table.">
+            <TableCard name="Employee (e)" cols={[pk('EmployeeId'), col('FirstName'), fk('ReportsTo', 'Employee.EmployeeId')]} />
+            <Connector left="many" right="one" />
+            <TableCard name="Employee (m)" cols={[pk('EmployeeId'), col('FirstName')]} />
+          </Figure>
         </article>
 
-        <article className="pattern">
-          <h3>Lookup tables</h3>
-          <Figure caption="Each track stores a GenreId instead of repeating the genre's name.">
-            <TableCard name="Track" cols={[pk('TrackId'), col('Name'), fk('GenreId', 'Genre.GenreId')]} />
-            <Connector left="many" right="one" />
-            <TableCard name="Genre" cols={[pk('GenreId'), col('Name')]} />
-          </Figure>
+        <article className="pattern split">
           <div className="prose">
+            <h3>Lookup tables</h3>
             <p>
               A lookup table is a short list of names, like <code>Genre</code> and <code>MediaType</code> in Chinook.
               Storing the id instead of the text means a name is spelled once, can be fixed in one place, and can't be
               typed two different ways. You'll join to a lookup table whenever you need the readable name.
             </p>
           </div>
+          <Figure caption="Each track stores a GenreId instead of repeating the genre's name.">
+            <TableCard name="Track" cols={[pk('TrackId'), col('Name'), fk('GenreId', 'Genre.GenreId')]} />
+            <Connector left="many" right="one" />
+            <TableCard name="Genre" cols={[pk('GenreId'), col('Name')]} />
+          </Figure>
         </article>
 
-        <article className="pattern">
-          <h3>Optional links</h3>
+        <article className="pattern split">
           <div className="prose">
+            <h3>Optional links</h3>
             <p>
               A foreign key can be <code>NULL</code>, meaning "not linked to anything". In <code>school</code>, one
               course has no instructor yet, so its <code>instructor_id</code> is <code>NULL</code>. An inner join drops
@@ -364,17 +388,16 @@ JOIN courses c ON c.id = e.course_id;`}</Snippet>
               <LessonLink id="joins.left">LEFT JOIN</LessonLink>.
             </p>
           </div>
+          <Figure caption="Each course has one instructor or none. A course with no instructor has NULL in instructor_id.">
+            <TableCard name="courses" cols={[pk('id'), col('code'), fk('instructor_id', 'instructors.id')]} />
+            <Connector left="many" right="one or none" />
+            <TableCard name="instructors" cols={[pk('id'), col('first_name')]} />
+          </Figure>
         </article>
 
-        <article className="pattern">
-          <h3>One wide table</h3>
-          <Figure caption="Every fact about a penguin sits in its own row; values like the island name repeat.">
-            <TableCard
-              name="penguins"
-              cols={[pk('id'), col('species'), col('island'), col('body_mass_g'), col('sex'), col('year')]}
-            />
-          </Figure>
+        <article className="pattern split">
           <div className="prose">
+            <h3>One wide table</h3>
             <p>
               Not every dataset needs several tables. <code>penguins</code> has no foreign keys at all, so there's
               nothing to join, and every question is answered with filters and aggregates. The trade-off is
@@ -385,49 +408,59 @@ JOIN courses c ON c.id = e.course_id;`}</Snippet>
               <LessonLink id="aggregates.missing-values">Missing values in aggregates</LessonLink>.
             </p>
           </div>
+          <Figure caption="Every fact about a penguin sits in its own row; values like the island name repeat.">
+            <TableCard
+              name="penguins"
+              cols={[pk('id'), col('species'), col('island'), col('body_mass_g'), col('sex'), col('year')]}
+            />
+          </Figure>
         </article>
       </section>
 
       <section aria-labelledby="naming">
         <h2 id="naming">Same ideas, different naming styles</h2>
-        <div className="prose">
-          <p>Databases are designed by different people, and their names show it:</p>
-          <table className="grid naming">
-            <thead>
-              <tr>
-                <th></th>
-                <th>school, store</th>
-                <th>chinook</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Table names</td><td>plural, lowercase: <code>customers</code></td><td>singular, capitalised: <code>Customer</code></td></tr>
-              <tr><td>Primary key</td><td><code>id</code></td><td>table name + Id: <code>CustomerId</code></td></tr>
-              <tr><td>Foreign key</td><td><code>customer_id</code></td><td><code>CustomerId</code> (same name as the key it points to)</td></tr>
-              <tr><td>Column style</td><td>snake_case: <code>first_name</code></td><td>PascalCase: <code>FirstName</code></td></tr>
-            </tbody>
-          </table>
-          <p>
-            Neither is wrong. Match the style of the database you're working in, and remember that SQLite ignores case
-            in names, so <code>customer</code> and <code>Customer</code> refer to the same table. Text <em>values</em>{' '}
-            are different: <code>'AC/DC' = 'ac/dc'</code> is false.
-          </p>
-          <p>
-            Column types vary too. Chinook was written for many databases, so it uses type names like{' '}
-            <code>NVARCHAR(40)</code> and <code>DATETIME</code>. SQLite accepts them and stores the values as text or
-            numbers.
-          </p>
+        <div className="split">
+          <div className="prose">
+            <p>
+              Databases are designed by different people, and their names show it. Neither style is wrong. Match the
+              style of the database you're working in, and remember that SQLite ignores case in names, so{' '}
+              <code>customer</code> and <code>Customer</code> refer to the same table. Text <em>values</em> are
+              different: <code>'AC/DC' = 'ac/dc'</code> is false.
+            </p>
+            <p>
+              Column types vary too. Chinook was written for many databases, so it uses type names like{' '}
+              <code>NVARCHAR(40)</code> and <code>DATETIME</code>. SQLite accepts them and stores the values as text or
+              numbers.
+            </p>
+          </div>
+          <div className="aside">
+            <table className="grid naming">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>school, store</th>
+                  <th>chinook</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Table names</td><td>plural, lowercase: <code>customers</code></td><td>singular, capitalised: <code>Customer</code></td></tr>
+                <tr><td>Primary key</td><td><code>id</code></td><td>table name + Id: <code>CustomerId</code></td></tr>
+                <tr><td>Foreign key</td><td><code>customer_id</code></td><td><code>CustomerId</code> (same name as the key it points to)</td></tr>
+                <tr><td>Column style</td><td>snake_case: <code>first_name</code></td><td>PascalCase: <code>FirstName</code></td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <section aria-labelledby="datasets">
         <h2 id="datasets">Explore QueryLab's datasets</h2>
-        <p className="lead">
-          Open a dataset to see its real tables, keys and links, read straight from the database.
-        </p>
-        {DATASETS.map((d) => (
-          <DatasetExplorer key={d.id} id={d.id} blurb={d.blurb} />
-        ))}
+        <p className="lead">Open a dataset to see its real tables, keys and links, read straight from the database.</p>
+        <div className="datasets">
+          {DATASETS.map((d) => (
+            <DatasetExplorer key={d.id} id={d.id} blurb={d.blurb} />
+          ))}
+        </div>
       </section>
     </div>
   );

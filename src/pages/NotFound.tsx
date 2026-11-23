@@ -5,7 +5,7 @@ export function NotFound() {
     <div className="page narrow">
       <h1>Page not found</h1>
       <p>
-        This lesson or page doesn't exist. <Link to="/learn">Go to all modules</Link>.
+        There's no lesson or page at this address. <Link to="/learn">See all lessons</Link>.
       </p>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Marked } from 'marked';
+import { highlightSql } from '../lib/highlight';
 
 const escape = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -10,7 +11,7 @@ const md = new Marked({
     code({ text, lang }) {
       if (!lang?.startsWith('sql')) return false;
       const button = lang.includes('run') ? `<button class="btn small try" data-sql="${escape(text)}">Try it</button>` : '';
-      return `<div class="example"><pre><code>${escape(text)}</code></pre>${button}</div>`;
+      return `<div class="example"><pre><code>${highlightSql(text)}</code></pre>${button}</div>`;
     },
   },
 });

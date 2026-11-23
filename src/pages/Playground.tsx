@@ -14,9 +14,10 @@ export function Playground() {
   const [sql, setSql] = useState('SELECT name FROM sqlite_master WHERE type = \'table\';');
 
   return (
-    <div className="page wide">
+    <div className="screen playground">
       <div className="playground-head">
         <h1>Playground</h1>
+        <p>Write any query you like. Nothing is graded, and every run starts from a fresh copy of the data.</p>
         <label>
           Dataset{' '}
           <select value={dataset} onChange={(e) => setDataset(e.target.value)}>
@@ -26,9 +27,6 @@ export function Playground() {
           </select>
         </label>
       </div>
-      <p className="lead">
-        Write any query you like. Nothing is graded, and nothing you run can break the data: every run starts from a fresh copy.
-      </p>
       <Workspace datasetId={dataset} value={sql} onChange={setSql} />
     </div>
   );

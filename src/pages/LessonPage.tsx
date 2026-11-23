@@ -4,6 +4,7 @@ import { findLesson, lessonPath, type Lesson, type Module } from '../content/loa
 import { Workspace } from '../components/Workspace';
 import { LessonBody } from '../components/LessonBody';
 import { ResultDiff } from '../components/ResultDiff';
+import { Mark } from '../components/Mark';
 import { gradeQuery } from '../engine/client';
 import type { GradeResult } from '../engine/compare';
 import { useProgress } from '../lib/progress';
@@ -36,6 +37,8 @@ function LessonView({ lesson, module, prev, next }: ViewProps) {
   const [result, setResult] = useState<GradeResult | null>(null);
   const [feedbackKey, setFeedbackKey] = useState(0);
   const [grading, setGrading] = useState(false);
+  // The exercise solved just now: its check mark draws itself once, in the margin.
+  const [freshlySolved, setFreshlySolved] = useState<string | null>(null);
 
   const ex = lesson.exercises[active];
   const sql = ex ? (drafts[ex.id] ?? rows[ex.id]?.last_sql ?? ex.starter ?? '') : (drafts.free ?? '');
@@ -59,6 +62,7 @@ function LessonView({ lesson, module, prev, next }: ViewProps) {
     setResult(r);
     setFeedbackKey((k) => k + 1);
     setGrading(false);
+    if (r.pass && rows[ex.id]?.status !== 'solved') setFreshlySolved(ex.id);
     record(ex.id, sql, r.pass);
   }
 
@@ -118,9 +122,10 @@ function LessonView({ lesson, module, prev, next }: ViewProps) {
                 const solved = rows[e.id]?.status === 'solved';
                 const shown = hintsShown[e.id] ?? 0;
                 return (
-                  <li key={e.id} className={`exercise${i === active ? ' active' : ''}${solved ? ' solved' : ''}`}>
+                  <li key={e.id} className={`exercise in-margin${i === active ? ' active' : ''}${solved ? ' solved' : ''}`}>
                     <button className="exercise-head" onClick={() => choose(i)} aria-expanded={i === active}>
-                      <span className="mark" aria-label={solved ? 'Solved' : 'Not solved'}>{solved ? '✓' : i + 1}</span>
+                      <Mark n={i + 1} solved={solved} fresh={freshlySolved === e.id} />
+                      <span className="sr-only">{solved ? 'Solved: ' : `Exercise ${i + 1}, not solved yet: `}</span>
                       <span className="prompt">{inline(e.prompt)}</span>
                     </button>
                     {i === active && (
@@ -155,7 +160,7 @@ function LessonView({ lesson, module, prev, next }: ViewProps) {
         </nav>
       </article>
 
-      <div className="lesson-workspace">
+      <div className="lesson-workspace screen">
         <Workspace
           datasetId={ex?.dataset ?? lesson.dataset}
           task={
@@ -175,8 +180,8 @@ function LessonView({ lesson, module, prev, next }: ViewProps) {
           feedbackKey={feedbackKey}
           actions={
             ex && (
-              <button className="btn submit" onClick={submit} disabled={grading}>
-                {grading ? 'Checking…' : `Submit exercise ${active + 1}`}
+              <button className="btn primary" onClick={submit} disabled={grading}>
+                {grading ? 'Checking…' : 'Check answer'}
               </button>
             )
           }
