@@ -1,11 +1,32 @@
 import { useEffect, useRef } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
-import { keymap } from '@codemirror/view';
-import { Compartment, Prec } from '@codemirror/state';
+import { keymap, type Command } from '@codemirror/view';
+import { Compartment, EditorSelection, Prec } from '@codemirror/state';
 import { sql, SQLite } from '@codemirror/lang-sql';
-import { syntaxHighlighting } from '@codemirror/language';
+import { indentUnit, syntaxHighlighting } from '@codemirror/language';
+import { indentLess, indentMore } from '@codemirror/commands';
+import { acceptCompletion } from '@codemirror/autocomplete';
 import { classHighlighter } from '@lezer/highlight';
 import type { TableSchema } from '../engine/core';
+
+const INDENT = '  ';
+
+/** Tab as in a code editor: take the open suggestion, otherwise indent. With text selected it indents every
+ *  selected line; with just a cursor it inserts spaces up to the next indent stop. Shift+Tab un-indents.
+ *  Keyboard users can still leave: CodeMirror lets Tab move focus right after Esc, and Ctrl+M (Shift+Alt+M on
+ *  a Mac) switches Tab back to moving focus. */
+const tab: Command = (view) => {
+  if (acceptCompletion(view)) return true;
+  const { state } = view;
+  if (state.selection.ranges.some((r) => !r.empty)) return indentMore(view);
+  const changes = state.changeByRange((range) => {
+    const column = range.head - state.doc.lineAt(range.head).from;
+    const insert = ' '.repeat(INDENT.length - (column % INDENT.length));
+    return { changes: { from: range.head, insert }, range: EditorSelection.cursor(range.head + insert.length) };
+  });
+  view.dispatch(state.update(changes, { scrollIntoView: true, userEvent: 'input' }));
+  return true;
+};
 
 interface Props {
   value: string;
@@ -48,14 +69,23 @@ export function SqlEditor({ value, onChange, onRun, schema }: Props) {
       parent: host.current!,
       doc: value,
       extensions: [
-        Prec.highest(keymap.of([{ key: 'Mod-Enter', run: () => (callbacks.current.onRun(), true) }])),
+        Prec.highest(
+          keymap.of([
+            { key: 'Mod-Enter', run: () => (callbacks.current.onRun(), true) },
+            { key: 'Tab', run: tab, shift: indentLess },
+          ]),
+        ),
         basicSetup,
+        indentUnit.of(INDENT),
         language.current.of(sql({ dialect: SQLite })),
         syntaxHighlighting(classHighlighter),
         theme,
         EditorView.lineWrapping,
         EditorView.updateListener.of((u) => u.docChanged && callbacks.current.onChange(u.state.doc.toString())),
-        EditorView.contentAttributes.of({ 'aria-label': 'SQL editor' }),
+        EditorView.contentAttributes.of({
+          'aria-label': 'SQL editor',
+          'aria-description': 'Tab indents. To leave the editor, press Escape, then Tab.',
+        }),
       ],
     });
     return () => view.current?.destroy();

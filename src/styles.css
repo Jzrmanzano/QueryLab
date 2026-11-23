@@ -227,6 +227,13 @@ select, input { font: inherit; padding: 6px 10px; border: 2px solid var(--ink); 
 .editor-bar .spacer { flex: 1; }
 .dataset-label { font-size: 0.875rem; color: var(--soft); }
 .dataset-label strong { color: var(--text); }
+.editor-area { position: relative; }
+.tab-hint {
+  position: absolute; right: 8px; bottom: 6px; margin: 0; padding: 2px 8px; border-radius: 4px;
+  background: var(--screen-deep); font-size: 0.8125rem; color: var(--faint); pointer-events: none; visibility: hidden;
+}
+.tab-hint kbd { font-size: 0.75rem; padding: 0 4px; border: 1px solid var(--screen-line); border-radius: 3px; color: var(--soft); }
+.editor-area:has(.cm-focused) .tab-hint { visibility: visible; }
 
 /* SQL colours (editor tokens and highlighted examples). Keywords use the pad's yellow. */
 .tok-keyword { color: var(--pad); font-weight: 700; }
@@ -482,6 +489,7 @@ select, input { font: inherit; padding: 6px 10px; border: 2px solid var(--ink); 
   .example pre { padding-right: 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
   .example .try { position: static; margin-top: 8px; }
   .dataset-label { flex: 1 0 100%; }
+  .editor-area:has(.cm-focused) .tab-hint { visibility: hidden; } /* phones rarely have a Tab key */
   .editor-bar .spacer { display: none; }
   .solved-count { font-size: 0.875rem; }
   .page, .lesson { padding: 24px 16px 40px calc(var(--gutter) + var(--gap)); }

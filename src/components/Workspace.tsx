@@ -76,7 +76,14 @@ export function Workspace({ datasetId, task, value, onChange, actions, feedback,
     <div className="workspace" ref={box}>
       {task && <div className="task">{task}</div>}
       <div className="editor-frame">
-        <SqlEditor value={value} onChange={onChange} onRun={execute} schema={schema} />
+        <div className="editor-area">
+          <SqlEditor value={value} onChange={onChange} onRun={execute} schema={schema} />
+          {/* Shown only while typing, over the editor's corner so nothing moves. Screen readers get the same
+              advice from the editor's own description. */}
+          <p className="tab-hint" aria-hidden="true">
+            To leave the editor, press <kbd>Esc</kbd> then <kbd>Tab</kbd>
+          </p>
+        </div>
         <div className="editor-bar">
           <span className="dataset-label">
             Dataset: <strong>{datasetId}</strong>
