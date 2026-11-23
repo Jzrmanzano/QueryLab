@@ -16,11 +16,13 @@ interface Props {
   /** When set, a Feedback tab is shown; changing `feedbackKey` switches to it. */
   feedback?: ReactNode;
   feedbackKey?: number;
+  /** Run the starting query as soon as the workspace appears (used by the home page demo). */
+  autoRun?: boolean;
 }
 
 type Tab = 'results' | 'schema' | 'feedback';
 
-export function Workspace({ datasetId, task, value, onChange, actions, feedback, feedbackKey }: Props) {
+export function Workspace({ datasetId, task, value, onChange, actions, feedback, feedbackKey, autoRun = false }: Props) {
   const [run, setRun] = useState<RunState>({ kind: 'idle' });
   const [schema, setSchema] = useState<TableSchema[]>([]);
   const [tab, setTab] = useState<Tab>('results');
@@ -35,6 +37,12 @@ export function Workspace({ datasetId, task, value, onChange, actions, feedback,
   useEffect(() => {
     if (feedbackKey) setTab('feedback');
   }, [feedbackKey]);
+
+  useEffect(() => {
+    if (autoRun) execute();
+    // Only on first appearance: later runs are the learner's.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function execute() {
     if (!value.trim()) return;
@@ -58,12 +66,13 @@ export function Workspace({ datasetId, task, value, onChange, actions, feedback,
       <div className="editor-frame">
         <SqlEditor value={value} onChange={onChange} onRun={execute} schema={schema} />
         <div className="editor-bar">
-          <span className="dataset">
+          <span className="dataset-label">
             Dataset: <strong>{datasetId}</strong>
           </span>
           <span className="spacer" />
           {actions}
-          <button className="btn primary" onClick={execute} title="Run (Ctrl+Enter)">
+          {/* When there's a graded action (Check answer), Run steps back to secondary. */}
+          <button className={actions ? 'btn' : 'btn primary'} onClick={execute} title="Run (Ctrl+Enter)">
             Run <kbd>Ctrl+Enter</kbd>
           </button>
         </div>

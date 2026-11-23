@@ -1,5 +1,6 @@
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router';
-import { ProgressProvider } from './lib/progress';
+import { ProgressProvider, useProgress } from './lib/progress';
+import { exercises } from './content/loader';
 import { Landing } from './pages/Landing';
 import { ModuleMap } from './pages/ModuleMap';
 import { LessonPage } from './pages/LessonPage';
@@ -10,20 +11,21 @@ import { Privacy } from './pages/Privacy';
 import { Guide } from './pages/Guide';
 
 function Header() {
+  const { rows } = useProgress();
+  const solved = exercises.filter((e) => rows[e.id]?.status === 'solved').length;
   return (
     <header className="site-header">
-      <Link to="/" className="logo" aria-label="QueryLab home">
-        <span className="logo-mark" aria-hidden>
-          ▦
-        </span>
+      <Link to="/" className="wordmark">
         QueryLab
       </Link>
-      <nav>
-        <NavLink to="/learn">Learn</NavLink>
+      <nav aria-label="Main">
+        <NavLink to="/learn">Lessons</NavLink>
         <NavLink to="/guide">Guide</NavLink>
         <NavLink to="/playground">Playground</NavLink>
-        <NavLink to="/progress">Progress</NavLink>
       </nav>
+      <NavLink to="/progress" className="solved-count" aria-label={`Your progress: ${solved} of ${exercises.length} exercises solved`}>
+        <strong>{solved}</strong> of {exercises.length} solved
+      </NavLink>
     </header>
   );
 }
@@ -46,12 +48,12 @@ export function App() {
           </Routes>
         </main>
         <footer className="site-footer">
-          <span>QueryLab</span>
-          <Link to="/privacy">Privacy policy</Link>
-          <span>
-            Sample data: <a href="https://github.com/lerocha/chinook-database">Chinook</a> © Luis Rocha (MIT) ·{' '}
-            <a href="https://allisonhorst.github.io/palmerpenguins/">Palmer Penguins</a> (CC0)
-          </span>
+          <p>
+            QueryLab is free and needs no account; your progress stays in this browser (
+            <Link to="/privacy">privacy policy</Link>). Sample data:{' '}
+            <a href="https://github.com/lerocha/chinook-database">Chinook</a> by Luis Rocha (MIT licence) and{' '}
+            <a href="https://allisonhorst.github.io/palmerpenguins/">Palmer Penguins</a> (CC0).
+          </p>
         </footer>
       </ProgressProvider>
     </BrowserRouter>
