@@ -1,0 +1,30 @@
+- id: aggregates.missing-values.e1
+  prompt: How many penguins have a recorded body mass? Show one number.
+  dataset: penguins
+  solution: SELECT COUNT(body_mass_g) FROM penguins;
+  hints:
+    - COUNT(column) skips rows where that column is NULL.
+
+- id: aggregates.missing-values.e2
+  prompt: List the id, species and island of every penguin whose sex is unknown.
+  dataset: penguins
+  solution: SELECT id, species, island FROM penguins WHERE sex IS NULL;
+  hints:
+    - Unknown means NULL.
+    - "= NULL never matches anything: use IS NULL."
+
+- id: aggregates.missing-values.e3
+  prompt: For each species, show the species, the number of penguins, and how many of them were weighed (have a body_mass_g).
+  dataset: penguins
+  solution: SELECT species, COUNT(*), COUNT(body_mass_g) FROM penguins GROUP BY species;
+  hints:
+    - Group by species.
+    - COUNT(*) and COUNT(body_mass_g) count different things.
+
+- id: aggregates.missing-values.e4
+  prompt: For each sex, show the sex and the number of penguins, with an unknown sex shown as the text 'unknown'.
+  dataset: penguins
+  solution: SELECT COALESCE(sex, 'unknown'), COUNT(*) FROM penguins GROUP BY COALESCE(sex, 'unknown');
+  hints:
+    - COALESCE(sex, 'unknown') replaces NULL with 'unknown'.
+    - Group by the same COALESCE expression you select.

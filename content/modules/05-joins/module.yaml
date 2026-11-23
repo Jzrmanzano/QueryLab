@@ -1,2 +1,2 @@
 title: Joins
-summary: Combine rows from related tables with INNER JOIN and LEFT JOIN.
+summary: Combine rows from related tables with INNER and LEFT JOIN, across many tables, and from a table to itself.

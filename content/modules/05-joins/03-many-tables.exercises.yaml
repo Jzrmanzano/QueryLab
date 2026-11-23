@@ -1,0 +1,30 @@
+- id: joins.many-tables.e1
+  prompt: List the title of every album by the artist named AC/DC.
+  dataset: chinook
+  solution: SELECT al.Title FROM Album al JOIN Artist ar ON ar.ArtistId = al.ArtistId WHERE ar.Name = 'AC/DC';
+  hints:
+    - Album has an ArtistId column that matches Artist.ArtistId.
+
+- id: joins.many-tables.e2
+  prompt: List every track by Queen. Show the track name, then the title of its album.
+  dataset: chinook
+  solution: SELECT t.Name, al.Title FROM Track t JOIN Album al ON al.AlbumId = t.AlbumId JOIN Artist ar ON ar.ArtistId = al.ArtistId WHERE ar.Name = 'Queen';
+  hints:
+    - Track → Album → Artist takes two joins.
+    - Filter on the artist's name, Artist.Name.
+
+- id: joins.many-tables.e3
+  prompt: For each genre, show the genre name and how many tracks it has.
+  dataset: chinook
+  solution: SELECT g.Name, COUNT(*) FROM Genre g JOIN Track t ON t.GenreId = g.GenreId GROUP BY g.GenreId, g.Name;
+  hints:
+    - Track has a GenreId column.
+    - Join Genre to Track, then group by the genre.
+
+- id: joins.many-tables.e4
+  prompt: List the name of every track on the playlist named Grunge.
+  dataset: chinook
+  solution: SELECT t.Name FROM Playlist p JOIN PlaylistTrack pt ON pt.PlaylistId = p.PlaylistId JOIN Track t ON t.TrackId = pt.TrackId WHERE p.Name = 'Grunge';
+  hints:
+    - Playlists and tracks are linked through the PlaylistTrack table.
+    - Join Playlist → PlaylistTrack → Track.

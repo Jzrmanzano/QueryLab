@@ -4,11 +4,13 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import initSqlJs from 'sql.js';
 import { Engine } from '../engine/core';
 import { exercises, lessons, modules } from './loader';
-import { datasets } from './datasets';
+import { datasetIds, loadDataset } from './datasets';
 
 let engine: Engine;
+let datasets: Record<string, string>;
 beforeAll(async () => {
   engine = new Engine(await initSqlJs());
+  datasets = Object.fromEntries(await Promise.all(datasetIds.map(async (id) => [id, await loadDataset(id)])));
 });
 
 describe('content', () => {
@@ -33,6 +35,14 @@ describe('content', () => {
     expect(r).toEqual({ pass: true });
     const out = engine.run(e.dataset, datasets[e.dataset], e.solution);
     expect(out.rowCount, 'solution returns no rows').toBeGreaterThan(0);
+  });
+
+  // Every "Try it" example in a lesson must run on that lesson's dataset.
+  const examples = lessons.flatMap((l) =>
+    [...l.body.matchAll(/```sql run\r?\n([\s\S]*?)```/g)].map((m, i) => [`${l.id} example ${i + 1}`, l.dataset, m[1]] as const),
+  );
+  it.each(examples)('%s runs', (_name, dataset, sql) => {
+    expect(() => engine.run(dataset, datasets[dataset], sql)).not.toThrow();
   });
 
   it('grades a wrong answer as wrong', () => {

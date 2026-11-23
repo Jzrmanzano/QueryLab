@@ -45,6 +45,10 @@ export function App() {
         <footer className="site-footer">
           <span>QueryLab</span>
           <Link to="/privacy">Privacy policy</Link>
+          <span>
+            Sample data: <a href="https://github.com/lerocha/chinook-database">Chinook</a> © Luis Rocha (MIT) ·{' '}
+            <a href="https://allisonhorst.github.io/palmerpenguins/">Palmer Penguins</a> (CC0)
+          </span>
         </footer>
       </ProgressProvider>
     </BrowserRouter>

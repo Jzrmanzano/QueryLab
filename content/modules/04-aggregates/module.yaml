@@ -1,2 +1,2 @@
 title: Aggregates
-summary: Count, sum and average rows, and summarize them per group with GROUP BY and HAVING.
+summary: Count, sum and average rows, summarize them per group with GROUP BY and HAVING, and handle missing values.

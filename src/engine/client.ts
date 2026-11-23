@@ -4,8 +4,12 @@ import type { Check, GradeResult } from './compare';
 import type { RunOutput, TableSchema } from './core';
 
 export const TIMEOUT_MS = 3000;
+// Downloading and building a dataset the first time can be slow on a poor connection,
+// so it gets its own, much longer limit and never eats into a query's 3 seconds.
+const PREPARE_TIMEOUT_MS = 60_000;
 
 export type Request =
+  | { type: 'prepare'; datasetId: string }
   | { type: 'run'; datasetId: string; sql: string }
   | { type: 'grade'; datasetId: string; sql: string; solution: string; check?: Check }
   | { type: 'schema'; datasetId: string };
@@ -16,6 +20,7 @@ let worker: Worker | null = null;
 let workerReady: Promise<void> = Promise.resolve();
 let nextId = 1;
 const pending = new Map<number, Pending>();
+let prepared = new Map<string, Promise<void>>(); // datasets loaded into the current worker
 
 // The timeout clock starts only once the engine has loaded, so a slow
 // first download of the WASM file is never mistaken for a runaway query.
@@ -39,6 +44,7 @@ function getWorker(): Worker {
 function restart(reason: string) {
   worker?.terminate();
   worker = null;
+  prepared = new Map();
   for (const p of pending.values()) {
     clearTimeout(p.timer);
     p.reject(new Error(reason));
@@ -46,23 +52,41 @@ function restart(reason: string) {
   pending.clear();
 }
 
-async function send<T>(req: Request): Promise<T> {
+const QUERY_TIMEOUT = `Query stopped after ${TIMEOUT_MS / 1000} s. It may loop forever or produce too many rows.`;
+const PREPARE_TIMEOUT = 'The dataset took too long to load. Check your connection and try again.';
+
+async function send<T>(req: Request, timeoutMs = TIMEOUT_MS, timeoutMessage = QUERY_TIMEOUT): Promise<T> {
   const w = getWorker();
   await workerReady;
   const id = nextId++;
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(
-      () => restart(`Query stopped after ${TIMEOUT_MS / 1000} s. It may loop forever or produce too many rows.`),
-      TIMEOUT_MS,
-    );
+    const timer = setTimeout(() => restart(timeoutMessage), timeoutMs);
     pending.set(id, { resolve, reject, timer });
     w.postMessage({ id, ...req });
   });
 }
 
-export const runQuery = (datasetId: string, sql: string) => send<RunOutput>({ type: 'run', datasetId, sql });
+/** Loads a dataset into the worker once; later requests for it start their timers only after that. */
+function prepare(datasetId: string): Promise<void> {
+  let ready = prepared.get(datasetId);
+  if (!ready) {
+    ready = send<void>({ type: 'prepare', datasetId }, PREPARE_TIMEOUT_MS, PREPARE_TIMEOUT).catch((e: Error) => {
+      prepared.delete(datasetId);
+      throw e;
+    });
+    prepared.set(datasetId, ready);
+  }
+  return ready;
+}
+
+async function sendFor<T>(req: Exclude<Request, { type: 'prepare' }>): Promise<T> {
+  await prepare(req.datasetId);
+  return send<T>(req);
+}
+
+export const runQuery = (datasetId: string, sql: string) => sendFor<RunOutput>({ type: 'run', datasetId, sql });
 
 export const gradeQuery = (datasetId: string, sql: string, solution: string, check?: Check) =>
-  send<GradeResult>({ type: 'grade', datasetId, sql, solution, check });
+  sendFor<GradeResult>({ type: 'grade', datasetId, sql, solution, check });
 
-export const getSchema = (datasetId: string) => send<TableSchema[]>({ type: 'schema', datasetId });
+export const getSchema = (datasetId: string) => sendFor<TableSchema[]>({ type: 'schema', datasetId });

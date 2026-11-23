@@ -3,7 +3,8 @@ import { Workspace } from '../components/Workspace';
 import { datasetIds } from '../content/datasets';
 
 export function Playground() {
-  const [dataset, setDataset] = useState(datasetIds[0] ?? 'school');
+  // Start on the small school dataset; bigger ones (e.g. chinook) load only when picked.
+  const [dataset, setDataset] = useState(datasetIds.includes('school') ? 'school' : datasetIds[0]);
   const [sql, setSql] = useState('SELECT name FROM sqlite_master WHERE type = \'table\';');
 
   return (

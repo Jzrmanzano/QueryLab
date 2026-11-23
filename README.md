@@ -3,7 +3,7 @@
 A self-paced website for learning SQL. Students read a short lesson, write queries against a real SQLite database running in their browser, and get each exercise checked instantly.
 
 - **Stack:** Vite + React + TypeScript, sql.js (SQLite in WebAssembly) in a Web Worker, CodeMirror 6, Vercel hosting. No accounts or backend: progress is saved in the browser's localStorage.
-- **Content:** 6 modules, 12 lessons, 32 exercises, 2 datasets (`school`, `store`). All of it is plain files in `content/`.
+- **Content:** 6 modules, 15 lessons, 44 exercises, 4 datasets (`school`, `store`, `chinook`, `penguins`). All of it is plain files in `content/`. Each dataset loads only when a lesson or the playground first uses it.
 
 ## Run it locally
 
@@ -18,13 +18,19 @@ No setup or environment variables needed.
 
 ## Progress
 
-Each learner's progress (attempts, solved exercises, last submitted query) is stored in their own browser under the localStorage key `querylab.progress.v1` (see `src/lib/progress.tsx`). It never leaves the device, so it doesn't sync across browsers or devices, and clearing site data erases it.
+Each learner's progress (attempts, solved exercises, last submitted query) is stored in their own browser under the localStorage key `querylab.progress.v1` (see `src/lib/progress.tsx`). It never leaves the device, so it doesn't sync across browsers or devices, and clearing site data erases it. Learners can download a JSON backup from the Progress page and restore it on another device; restoring merges with what's already there (solved wins, the newer query wins).
 
 ## Deploy to Vercel
 
 Import the repo in Vercel (framework preset: Vite) and deploy. `vercel.json` sends every route to `index.html` so deep links like `/learn/05-joins/02-left-join` work.
 
 The privacy policy lives in `src/pages/Privacy.tsx`. Update it if QueryLab starts collecting anything new.
+
+## Dataset credits
+
+- `school` and `store` were written for QueryLab.
+- `chinook`: [Chinook Database](https://github.com/lerocha/chinook-database) v1.4.5 by Luis Rocha, MIT licensed. The full license notice is kept at the top of `content/datasets/chinook.sql`; keep it there if you update the file.
+- `penguins`: [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) by Allison Horst, Alison Hill and Kristen Gorman, CC0. Data collected by Dr. Kristen Gorman and the Palmer Station LTER. QueryLab added the `id` column and stores `NA` as `NULL`.
 
 ## Adding a lesson
 

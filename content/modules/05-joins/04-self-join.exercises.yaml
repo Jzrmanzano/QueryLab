@@ -1,0 +1,28 @@
+- id: joins.self.e1
+  prompt: Show each employee's first name and their manager's first name. Leave out employees who have no manager.
+  dataset: chinook
+  solution: SELECT e.FirstName, m.FirstName FROM Employee e JOIN Employee m ON m.EmployeeId = e.ReportsTo;
+  hints:
+    - Join Employee to itself with two aliases.
+    - The manager is the row whose EmployeeId equals the employee's ReportsTo.
+
+- id: joins.self.e2
+  prompt: List the first and last name of every employee who reports to Nancy Edwards.
+  dataset: chinook
+  solution: SELECT e.FirstName, e.LastName FROM Employee e JOIN Employee m ON m.EmployeeId = e.ReportsTo WHERE m.FirstName = 'Nancy' AND m.LastName = 'Edwards';
+  hints:
+    - Self-join Employee, then filter on the manager's name.
+
+- id: joins.self.e3
+  prompt: Show every employee's first name and their manager's first name, including the employee with no manager (their manager's name should be NULL).
+  dataset: chinook
+  solution: SELECT e.FirstName, m.FirstName FROM Employee e LEFT JOIN Employee m ON m.EmployeeId = e.ReportsTo;
+  hints:
+    - An inner join drops the general manager. Which join keeps every row from the left table?
+
+- id: joins.self.e4
+  prompt: For each manager, show their first name and how many employees report directly to them.
+  dataset: chinook
+  solution: SELECT m.FirstName, COUNT(*) FROM Employee e JOIN Employee m ON m.EmployeeId = e.ReportsTo GROUP BY m.EmployeeId, m.FirstName;
+  hints:
+    - Self-join, then group by the manager.

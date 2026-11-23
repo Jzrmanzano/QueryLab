@@ -1,7 +1,7 @@
 import initSqlJs from 'sql.js';
 import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import { Engine, errorText, explainError } from './core';
-import { datasets } from '../content/datasets';
+import { loadDataset } from '../content/datasets';
 import type { Request } from './client';
 
 // Seen from inside, a dedicated worker has the same postMessage/onmessage shape as a Worker.
@@ -14,11 +14,12 @@ ready.then(() => ctx.postMessage({ ready: true }));
 ctx.onmessage = async (e: MessageEvent<Request & { id: number }>) => {
   const { id, ...req } = e.data;
   const engine = await ready;
-  const seed = datasets[req.datasetId];
   try {
-    if (!seed) throw new Error(`Unknown dataset "${req.datasetId}"`);
-    let result: unknown;
-    if (req.type === 'run') {
+    const seed = await loadDataset(req.datasetId);
+    let result: unknown = null;
+    if (req.type === 'prepare') {
+      engine.open(req.datasetId, seed).close(); // builds and caches the pristine database
+    } else if (req.type === 'run') {
       try {
         result = engine.run(req.datasetId, seed, req.sql);
       } catch (err) {
