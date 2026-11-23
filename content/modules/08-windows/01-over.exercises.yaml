@@ -1,0 +1,31 @@
+- id: windows.over.e1
+  prompt: For every penguin with a recorded body mass, show its id, species, body mass, and the average body mass of all those penguins.
+  dataset: penguins
+  solution: SELECT id, species, body_mass_g, AVG(body_mass_g) OVER () FROM penguins WHERE body_mass_g IS NOT NULL;
+  hints:
+    - Leave out unweighed penguins with WHERE body_mass_g IS NOT NULL.
+    - OVER () makes the window every row the query returns.
+
+- id: windows.over.e2
+  prompt: Show each penguin's id, species and island, and how many penguins of the same species live on the same island.
+  dataset: penguins
+  solution: SELECT id, species, island, COUNT(*) OVER (PARTITION BY species, island) FROM penguins;
+  hints:
+    - COUNT(*) works as a window function too.
+    - PARTITION BY can take more than one column.
+
+- id: windows.over.e3
+  prompt: For every penguin with a recorded body mass, show its id, species, body mass, and how much heavier it is than the average for its species (a negative number if it's lighter).
+  dataset: penguins
+  solution: SELECT id, species, body_mass_g, body_mass_g - AVG(body_mass_g) OVER (PARTITION BY species) FROM penguins WHERE body_mass_g IS NOT NULL;
+  hints:
+    - AVG(body_mass_g) OVER (PARTITION BY species) is the species average on every row.
+    - Subtract it from body_mass_g.
+
+- id: windows.over.e4
+  prompt: List the id, species and body mass of every penguin that's heavier than the average for its species.
+  dataset: penguins
+  solution: WITH with_average AS (SELECT id, species, body_mass_g, AVG(body_mass_g) OVER (PARTITION BY species) AS species_average FROM penguins) SELECT id, species, body_mass_g FROM with_average WHERE body_mass_g > species_average;
+  hints:
+    - WHERE can't use a window function directly.
+    - Work out the species average in a WITH, then filter in the main query.

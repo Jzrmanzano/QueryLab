@@ -1,0 +1,2 @@
+title: Window functions
+summary: Compare each row with the rows around it without merging them, from group averages and rankings to running totals and the previous row.

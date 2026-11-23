@@ -1,0 +1,31 @@
+- id: windows.running.e1
+  prompt: For each month, show the month as text like 2021-01, that month's revenue (the sum of invoice totals), and the total revenue from the first month up to and including that one.
+  dataset: chinook
+  solution: WITH monthly AS (SELECT strftime('%Y-%m', InvoiceDate) AS month, SUM(Total) AS revenue FROM Invoice GROUP BY month) SELECT month, revenue, SUM(revenue) OVER (ORDER BY month) FROM monthly;
+  hints:
+    - Total each month in a WITH first.
+    - SUM(revenue) OVER (ORDER BY month) adds up every month so far.
+
+- id: windows.running.e2
+  prompt: For each month, show the month, its revenue, and how much the revenue changed from the previous month. The first month has no previous month, so its change is empty.
+  dataset: chinook
+  solution: WITH monthly AS (SELECT strftime('%Y-%m', InvoiceDate) AS month, SUM(Total) AS revenue FROM Invoice GROUP BY month) SELECT month, revenue, revenue - LAG(revenue) OVER (ORDER BY month) FROM monthly;
+  hints:
+    - LAG(revenue) OVER (ORDER BY month) is the previous month's revenue.
+    - For the first month LAG gives NULL, and anything minus NULL is NULL, which is the empty value you want.
+
+- id: windows.running.e3
+  prompt: For every invoice, show the CustomerId, InvoiceId, InvoiceDate, and how many days had passed since that customer's previous invoice. A customer's first invoice has no previous one, so leave it empty.
+  dataset: chinook
+  solution: SELECT CustomerId, InvoiceId, InvoiceDate, julianday(InvoiceDate) - julianday(LAG(InvoiceDate) OVER (PARTITION BY CustomerId ORDER BY InvoiceDate)) FROM Invoice;
+  hints:
+    - PARTITION BY CustomerId so each customer's invoices are compared only with their own.
+    - LAG(InvoiceDate) gives the previous invoice's date, and julianday turns dates into numbers you can subtract.
+
+- id: windows.running.e4
+  prompt: For each month, show the month, its revenue, and the average revenue of that month and the two months before it. For the first two months, average the months there are.
+  dataset: chinook
+  solution: WITH monthly AS (SELECT strftime('%Y-%m', InvoiceDate) AS month, SUM(Total) AS revenue FROM Invoice GROUP BY month) SELECT month, revenue, AVG(revenue) OVER (ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) FROM monthly;
+  hints:
+    - The frame ROWS BETWEEN 2 PRECEDING AND CURRENT ROW covers this month and the two before it.
+    - It goes inside OVER, after the ORDER BY.

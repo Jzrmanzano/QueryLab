@@ -31,7 +31,8 @@ FROM orders;
 The format `'%Y-%m'` gives a label like `2025-03` that's the same for every day of that month, so you can group by it:
 
 ```sql run
-SELECT strftime('%Y-%m', ordered_on) AS month, COUNT(*) AS orders
+SELECT strftime('%Y-%m', ordered_on) AS month,
+       COUNT(*) AS orders
 FROM orders
 GROUP BY month
 ORDER BY month;
@@ -43,8 +44,10 @@ ORDER BY month;
 
 ```sql run
 SELECT o.id, c.joined_on, o.ordered_on,
-       date(o.ordered_on, '+7 days') AS follow_up_on,
-       julianday(o.ordered_on) - julianday(c.joined_on) AS days_after_joining
+       date(o.ordered_on, '+7 days') AS follow_up,
+       julianday(o.ordered_on)
+         - julianday(c.joined_on)
+         AS days_after_joining
 FROM orders o
 JOIN customers c ON c.id = o.customer_id;
 ```

@@ -22,14 +22,17 @@ FROM students;
 `SUBSTR(text, start, length)` cuts out a piece of text, counting positions from 1. Every student number starts with the two-digit year the student entered:
 
 ```sql run
-SELECT student_no, SUBSTR(student_no, 1, 2) AS entry_year
+SELECT student_no,
+       SUBSTR(student_no, 1, 2) AS entry_year
 FROM students;
 ```
 
 When the piece you want doesn't have a fixed length, find where it ends with `INSTR(text, search)`. It returns the position where `search` first appears, or 0 if it doesn't. The username in an email address is everything before the `@`:
 
 ```sql run
-SELECT email, SUBSTR(email, 1, INSTR(email, '@') - 1) AS username
+SELECT email,
+       SUBSTR(email, 1, INSTR(email, '@') - 1)
+         AS username
 FROM students;
 ```
 
@@ -40,7 +43,8 @@ Students with no email get `NULL` for both columns. Almost every function return
 `REPLACE(text, find, replacement)` swaps every match. Functions can be nested, and the inner one runs first, so this turns each course title into a lowercase web address:
 
 ```sql run
-SELECT title, LOWER(REPLACE(title, ' ', '-')) AS slug
+SELECT title,
+       LOWER(REPLACE(title, ' ', '-')) AS slug
 FROM courses;
 ```
 

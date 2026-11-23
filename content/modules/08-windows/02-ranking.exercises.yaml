@@ -1,0 +1,30 @@
+- id: windows.ranking.e1
+  prompt: Show each product's name, price, and its price rank, where 1 is the most expensive.
+  dataset: store
+  solution: SELECT name, price, RANK() OVER (ORDER BY price DESC) FROM products;
+  hints:
+    - Most expensive first means ORDER BY price DESC inside OVER.
+
+- id: windows.ranking.e2
+  prompt: Number each customer's orders in the order they were placed. Show the customer_id, the order id, the order date, and the number, starting from 1 at each customer's first order. If a customer placed two orders on the same day, the lower order id comes first.
+  dataset: store
+  solution: SELECT customer_id, id, ordered_on, ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY ordered_on, id) FROM orders;
+  hints:
+    - PARTITION BY customer_id starts the count again for each customer.
+    - ORDER BY ordered_on, id breaks ties between orders on the same day.
+
+- id: windows.ranking.e3
+  prompt: For each category, show the category and the name and price of its cheapest product.
+  dataset: store
+  solution: WITH ranked AS (SELECT category, name, price, RANK() OVER (PARTITION BY category ORDER BY price) AS r FROM products) SELECT category, name, price FROM ranked WHERE r = 1;
+  hints:
+    - Rank products by price within each category in a WITH.
+    - Keep the rows ranked 1.
+
+- id: windows.ranking.e4
+  prompt: Rank customers by how many orders they've placed. Show each customer's name, their number of orders, and their rank, where customers with the same number of orders share a rank and no rank numbers are skipped.
+  dataset: store
+  solution: SELECT c.name, COUNT(*), DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) FROM orders o JOIN customers c ON c.id = o.customer_id GROUP BY c.id, c.name;
+  hints:
+    - Join orders to customers and group by customer to count their orders.
+    - Shared ranks with no gaps is DENSE_RANK.

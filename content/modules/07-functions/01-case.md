@@ -43,7 +43,8 @@ Put a `CASE` inside `SUM` to count only the rows that meet a condition: each mat
 ```sql run
 SELECT c.code,
        COUNT(*) AS enrolled,
-       SUM(CASE WHEN e.grade = 5.0 THEN 1 ELSE 0 END) AS failed
+       SUM(CASE WHEN e.grade = 5.0 THEN 1
+                ELSE 0 END) AS failed
 FROM enrollments e
 JOIN courses c ON c.id = e.course_id
 GROUP BY c.code;
