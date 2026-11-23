@@ -1,0 +1,31 @@
+- id: functions.case.e1
+  prompt: Show each student's first name, last name, and their year level written as 'first year', 'second year', 'third year' or 'fourth year'.
+  dataset: school
+  solution: SELECT first_name, last_name, CASE year_level WHEN 1 THEN 'first year' WHEN 2 THEN 'second year' WHEN 3 THEN 'third year' WHEN 4 THEN 'fourth year' END FROM students;
+  hints:
+    - "Every WHEN compares year_level with a number, so the short form works: CASE year_level WHEN 1 THEN ..."
+    - Close the CASE with END.
+
+- id: functions.case.e2
+  prompt: For every enrollment that has a grade, show the student_id, course_id, grade, and a remark of 'excellent' for 1.0 to 1.5, 'good' for 1.75 to 2.5, 'fair' for 2.75 to 3.0, and 'failed' for anything else.
+  dataset: school
+  solution: SELECT student_id, course_id, grade, CASE WHEN grade <= 1.5 THEN 'excellent' WHEN grade <= 2.5 THEN 'good' WHEN grade <= 3.0 THEN 'fair' ELSE 'failed' END FROM enrollments WHERE grade IS NOT NULL;
+  hints:
+    - Leave out ungraded enrollments with WHERE grade IS NOT NULL.
+    - Lower grades are better, so test grade <= 1.5 first, then grade <= 2.5, then grade <= 3.0.
+
+- id: functions.case.e3
+  prompt: For each semester, show the semester, the number of enrollments, and how many of them have no grade yet.
+  dataset: school
+  solution: SELECT semester, COUNT(*), SUM(CASE WHEN grade IS NULL THEN 1 ELSE 0 END) FROM enrollments GROUP BY semester;
+  hints:
+    - Group by semester.
+    - "SUM(CASE WHEN grade IS NULL THEN 1 ELSE 0 END) counts the ungraded rows."
+
+- id: functions.case.e4
+  prompt: For each course that has students enrolled, show the course code, how many students passed (a grade of 3.0 or better), and how many failed (a grade of 5.0).
+  dataset: school
+  solution: SELECT c.code, SUM(CASE WHEN e.grade <= 3.0 THEN 1 ELSE 0 END), SUM(CASE WHEN e.grade = 5.0 THEN 1 ELSE 0 END) FROM enrollments e JOIN courses c ON c.id = e.course_id GROUP BY c.code;
+  hints:
+    - Join enrollments to courses to get the code, then group by it.
+    - Use one SUM(CASE ...) for passes and another for failures.

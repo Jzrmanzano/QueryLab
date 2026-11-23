@@ -1,0 +1,30 @@
+- id: functions.text.e1
+  prompt: Show each student's last name in capital letters, and their first name as it is.
+  dataset: school
+  solution: SELECT UPPER(last_name), first_name FROM students;
+  hints:
+    - UPPER(text) returns the text in capitals.
+
+- id: functions.text.e2
+  prompt: List the first and last names of students whose last name is longer than 7 letters.
+  dataset: school
+  solution: SELECT first_name, last_name FROM students WHERE LENGTH(last_name) > 7;
+  hints:
+    - Functions work in WHERE too.
+    - LENGTH(last_name) counts the letters.
+
+- id: functions.text.e3
+  prompt: Show each course's code and its subject, which is the part of the code before the space, such as IT or MATH.
+  dataset: school
+  solution: SELECT code, SUBSTR(code, 1, INSTR(code, ' ') - 1) FROM courses;
+  hints:
+    - INSTR(code, ' ') gives the position of the space.
+    - SUBSTR(code, 1, ...) takes everything up to one character before it.
+
+- id: functions.text.e4
+  prompt: For each entry year (the first two digits of student_no), show the entry year and how many students entered that year.
+  dataset: school
+  solution: SELECT SUBSTR(student_no, 1, 2), COUNT(*) FROM students GROUP BY SUBSTR(student_no, 1, 2);
+  hints:
+    - SUBSTR(student_no, 1, 2) gives the entry year.
+    - Group by the same expression you select.

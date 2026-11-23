@@ -3,7 +3,7 @@
 A self-paced website for learning SQL. Students read a short lesson, write queries against a real SQLite database running in their browser, and get each exercise checked instantly.
 
 - **Stack:** Vite + React + TypeScript, sql.js (SQLite in WebAssembly) in a Web Worker, CodeMirror 6, Vercel hosting. No accounts or backend: progress is saved in the browser's localStorage.
-- **Content:** 6 modules, 15 lessons, 44 exercises, 4 datasets (`school`, `store`, `chinook`, `penguins`). All of it is plain files in `content/`. Each dataset loads only when a lesson or the playground first uses it.
+- **Content:** 7 modules, 18 lessons, 56 exercises, 4 datasets (`school`, `store`, `chinook`, `penguins`). All of it is plain files in `content/`. Each dataset loads only when a lesson or the playground first uses it.
 
 ## Run it locally
 

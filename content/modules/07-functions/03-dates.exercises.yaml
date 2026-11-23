@@ -1,0 +1,31 @@
+- id: functions.dates.e1
+  prompt: List the id and date of every order placed in March 2025.
+  dataset: store
+  solution: SELECT id, ordered_on FROM orders WHERE strftime('%Y-%m', ordered_on) = '2025-03';
+  hints:
+    - strftime('%Y-%m', ordered_on) gives text like '2025-03'.
+    - BETWEEN '2025-03-01' AND '2025-03-31' works too, because the dates are text in YYYY-MM-DD form.
+
+- id: functions.dates.e2
+  prompt: For each month, show the month as text like 2025-01 and the number of orders that weren't cancelled.
+  dataset: store
+  solution: SELECT strftime('%Y-%m', ordered_on), COUNT(*) FROM orders WHERE status <> 'cancelled' GROUP BY strftime('%Y-%m', ordered_on);
+  hints:
+    - Filter out cancelled orders with WHERE before grouping.
+    - Group by strftime('%Y-%m', ordered_on).
+
+- id: functions.dates.e3
+  prompt: Show the id and date of each order, and the date 30 days later, when its return window closes.
+  dataset: store
+  solution: SELECT id, ordered_on, date(ordered_on, '+30 days') FROM orders;
+  hints:
+    - date(ordered_on, '+30 days') moves the date forward.
+
+- id: functions.dates.e4
+  prompt: For each customer who has placed an order, show their name and how many days after joining they placed their first order.
+  dataset: store
+  solution: SELECT c.name, MIN(julianday(o.ordered_on)) - julianday(c.joined_on) FROM customers c JOIN orders o ON o.customer_id = c.id GROUP BY c.id, c.name;
+  hints:
+    - Join customers to orders and group by customer.
+    - The first order is the earliest date, so use MIN.
+    - julianday(a) - julianday(b) is the number of days between two dates.

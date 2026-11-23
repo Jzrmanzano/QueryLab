@@ -16,7 +16,7 @@ beforeAll(async () => {
 
 describe('content', () => {
   it('loads all modules, lessons and exercises', () => {
-    expect(modules.length).toBe(6);
+    expect(modules.length).toBe(7);
     expect(lessons.length).toBeGreaterThan(0);
     expect(exercises.length).toBeGreaterThanOrEqual(30);
   });
