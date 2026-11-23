@@ -33,6 +33,10 @@ export function Privacy() {
           This data never leaves your device, and we have no copy of it. It won't follow you to another browser or
           device. You can erase it at any time by clearing this site's data in your browser settings.
         </p>
+        <p>
+          The Progress page can download this data as a backup file and restore it later. The file is created in your
+          browser and saved straight to your device; restoring reads it in your browser too. It's never uploaded to us.
+        </p>
 
         <h2 id="services">Services we use</h2>
         <p>Like any website, QueryLab relies on a few services that receive basic technical information when you visit:</p>

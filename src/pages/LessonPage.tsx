@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { findLesson, lessonPath, type Lesson, type Module } from '../content/loader';
 import { Workspace } from '../components/Workspace';
 import { LessonBody } from '../components/LessonBody';
+import { ResultDiff } from '../components/ResultDiff';
 import { gradeQuery } from '../engine/client';
 import type { GradeResult } from '../engine/compare';
 import { useProgress } from '../lib/progress';
@@ -83,16 +84,19 @@ function LessonView({ lesson, module, prev, next }: ViewProps) {
       )}
     </div>
   ) : (
-    <div className="verdict fail" role="alert">
-      <p>
-        <strong>Not yet.</strong> {result.message}
-      </p>
-      {ex.hints && (hintsShown[ex.id] ?? 0) < ex.hints.length && (
-        <button className="btn" onClick={() => setHintsShown((h) => ({ ...h, [ex.id]: (h[ex.id] ?? 0) + 1 }))}>
-          Show a hint
-        </button>
-      )}
-    </div>
+    <>
+      <div className="verdict fail" role="alert">
+        <p>
+          <strong>Not yet.</strong> {result.message}
+        </p>
+        {ex.hints && (hintsShown[ex.id] ?? 0) < ex.hints.length && (
+          <button className="btn" onClick={() => setHintsShown((h) => ({ ...h, [ex.id]: (h[ex.id] ?? 0) + 1 }))}>
+            Show a hint
+          </button>
+        )}
+      </div>
+      {result.diff && <ResultDiff diff={result.diff} />}
+    </>
   );
 
   return (

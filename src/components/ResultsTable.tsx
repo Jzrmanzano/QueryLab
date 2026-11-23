@@ -7,7 +7,7 @@ export type RunState =
   | { kind: 'ok'; out: RunOutput }
   | { kind: 'error'; message: string };
 
-function show(v: Cell) {
+export function show(v: Cell) {
   if (v === null) return <span className="null">NULL</span>;
   if (v instanceof Uint8Array) return <span className="null">[{v.length} bytes]</span>;
   return String(v);

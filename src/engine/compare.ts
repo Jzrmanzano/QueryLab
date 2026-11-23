@@ -14,9 +14,24 @@ export interface Check {
   verify?: string;        // for INSERT/UPDATE/DELETE: query whose output is compared
 }
 
+/** Rows of each table sent back for the feedback view; flags still cover every row. */
+export const DIFF_DISPLAY_ROWS = 50;
+
+/** Both result tables plus which rows don't line up, so feedback can show where an answer goes wrong. */
+export interface ResultDiff {
+  yours: QueryOutput; // first DIFF_DISPLAY_ROWS rows
+  expected: QueryOutput; // first DIFF_DISPLAY_ROWS rows
+  yoursTotal: number;
+  expectedTotal: number;
+  extra: number[]; // indexes of your rows that aren't in the expected result
+  missing: number[]; // indexes of expected rows your result lacks
+  misplaced: number[]; // ordered checks: positions where your row differs from the expected one
+  wrongColumn?: number; // column-name checks: index of the misnamed column
+}
+
 export type GradeResult =
   | { pass: true }
-  | { pass: false; reason: 'error' | 'empty' | 'columns' | 'rows' | 'order'; message: string };
+  | { pass: false; reason: 'error' | 'empty' | 'columns' | 'rows' | 'order'; message: string; diff?: ResultDiff };
 
 function cellKey(v: Cell, precision: number): string {
   if (v === null) return 'null';
@@ -44,7 +59,39 @@ function sameColumnsReordered(student: QueryOutput, expected: QueryOutput, preci
   });
 }
 
-const plural =(n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/** Pairs up equal rows (respecting duplicates) and reports the leftovers on each side. */
+function matchRows(got: string[], want: string[]): { extra: number[]; missing: number[] } {
+  const unmatched = new Map<string, number[]>();
+  want.forEach((k, i) => {
+    const slots = unmatched.get(k);
+    if (slots) slots.push(i);
+    else unmatched.set(k, [i]);
+  });
+  const extra: number[] = [];
+  got.forEach((k, i) => {
+    const slots = unmatched.get(k);
+    if (slots?.length) slots.shift();
+    else extra.push(i);
+  });
+  const missing = [...unmatched.values()].flat().sort((a, b) => a - b);
+  return { extra, missing };
+}
+
+function diffOf(student: QueryOutput, expected: QueryOutput, flags: Partial<ResultDiff> = {}): ResultDiff {
+  const head = (o: QueryOutput): QueryOutput => ({ columns: o.columns, rows: o.rows.slice(0, DIFF_DISPLAY_ROWS) });
+  return {
+    yours: head(student),
+    expected: head(expected),
+    yoursTotal: student.rows.length,
+    expectedTotal: expected.rows.length,
+    extra: [],
+    missing: [],
+    misplaced: [],
+    ...flags,
+  };
+}
 
 export function compareResults(student: QueryOutput, expected: QueryOutput, check: Check = {}): GradeResult {
   const precision = check.precision ?? 2;
@@ -58,6 +105,7 @@ export function compareResults(student: QueryOutput, expected: QueryOutput, chec
       pass: false,
       reason: 'columns',
       message: `Your result has ${plural(student.columns.length, 'column')}; expected ${plural(expected.columns.length, 'column')}.`,
+      diff: diffOf(student, expected),
     };
   }
 
@@ -70,6 +118,7 @@ export function compareResults(student: QueryOutput, expected: QueryOutput, chec
         pass: false,
         reason: 'columns',
         message: `Column ${wrong + 1} is named "${student.columns[wrong]}"; expected "${expected.columns[wrong]}".`,
+        diff: diffOf(student, expected, { wrongColumn: wrong }),
       };
     }
   }
@@ -82,6 +131,7 @@ export function compareResults(student: QueryOutput, expected: QueryOutput, chec
       pass: false,
       reason: 'rows',
       message: `Your result has ${plural(got.length, 'row')}; expected ${plural(want.length, 'row')}.`,
+      diff: diffOf(student, expected, matchRows(got, want)),
     };
   }
 
@@ -91,30 +141,27 @@ export function compareResults(student: QueryOutput, expected: QueryOutput, chec
       pass: false,
       reason: 'columns',
       message: 'You have the right data, but the columns are in a different order. Put them in the order the exercise asks for.',
+      diff: diffOf(student, expected),
     };
   }
   if (!sameSet) {
-    const remaining = new Map<string, number>();
-    for (const k of want) remaining.set(k, (remaining.get(k) ?? 0) + 1);
-    let wrongRows = 0;
-    for (const k of got) {
-      const n = remaining.get(k) ?? 0;
-      if (n > 0) remaining.set(k, n - 1);
-      else wrongRows++;
-    }
+    const matched = matchRows(got, want);
+    const wrongRows = matched.extra.length;
     return {
       pass: false,
       reason: 'rows',
       message: `The row count is right, but ${plural(wrongRows, 'row')} ${wrongRows === 1 ? 'has' : 'have'} different values than expected.`,
+      diff: diffOf(student, expected, matched),
     };
   }
 
   if (check.ordered && got.join('\n') !== want.join('\n')) {
-    const first = got.findIndex((k, i) => k !== want[i]);
+    const misplaced = got.flatMap((k, i) => (k !== want[i] ? [i] : []));
     return {
       pass: false,
       reason: 'order',
-      message: `You have the right rows, but in the wrong order (first difference at row ${first + 1}). Check your ORDER BY.`,
+      message: `You have the right rows, but in the wrong order (first difference at row ${misplaced[0] + 1}). Check your ORDER BY.`,
+      diff: diffOf(student, expected, { misplaced }),
     };
   }
 

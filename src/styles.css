@@ -15,6 +15,10 @@
   --pass-bg: #e3f1e8;
   --fail: #b23a2a;
   --fail-bg: #f8e6e2;
+  --missing: #8a6a00;
+  --missing-bg: #fbf1c7;
+  --moved: #1f5f8b;
+  --moved-bg: #e3edf5;
   --sans: 'IBM Plex Sans', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --radius: 6px;
@@ -98,6 +102,27 @@ main { padding: 32px 24px 64px; }
 .grid td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .grid tbody tr:hover { background: var(--row-hover); }
 .null { color: var(--ink-faint); font-style: italic; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- feedback diff ---------- */
+.diff { margin-top: 14px; display: grid; gap: 10px; }
+.diff h3 { font-size: 0.875rem; font-weight: 600; margin: 0 0 6px; }
+.diff h3 .count { margin-left: 4px; }
+.diff .grid-wrap { max-height: 280px; }
+.diff-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; align-items: start; }
+.diff-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.875rem; color: var(--ink-soft); }
+.diff-legend .key { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 6px; border-radius: 3px; font: 600 0.8125rem var(--mono); }
+.diff-legend .extra .key { background: var(--fail-bg); color: var(--fail); }
+.diff-legend .missing .key { background: var(--missing-bg); color: var(--missing); }
+.diff-legend .moved .key { background: var(--moved-bg); color: var(--moved); }
+.grid th.flag, .grid td.flag { width: 1%; padding-right: 8px; text-align: right; color: var(--ink-faint); font-size: 0.75rem; }
+.grid th.wrong { background: var(--fail); }
+.grid tr.extra, .grid tbody tr.extra:hover { background: var(--fail-bg); }
+.grid tr.missing, .grid tbody tr.missing:hover { background: var(--missing-bg); }
+.grid tr.moved, .grid tbody tr.moved:hover { background: var(--moved-bg); }
+.grid tr.extra td.flag { color: var(--fail); font-weight: 600; }
+.grid tr.missing td.flag { color: var(--missing); font-weight: 600; }
+.grid tr.moved td.flag { color: var(--moved); font-weight: 600; }
 .error { margin: 0; padding: 12px 14px; border-left: 4px solid var(--fail); background: var(--fail-bg); color: var(--fail); font-family: var(--mono); font-size: 0.875rem; white-space: pre-wrap; }
 
 .verdict { margin: 0; padding: 12px 14px; border-radius: var(--radius); border-left: 4px solid; }
@@ -170,6 +195,10 @@ main { padding: 32px 24px 64px; }
 .module-meter { width: 100%; height: 10px; margin-top: 8px; }
 
 /* ---------- progress ---------- */
+.backup { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 18px; margin-top: 20px; display: grid; gap: 10px; }
+.backup h2 { font-size: 1rem; margin: 0; }
+.backup .meta { margin: 0; }
+.backup-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .progress-module { margin-top: 32px; }
 .progress-lesson { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 10px; }
 .progress-lesson > a { font-weight: 600; }
