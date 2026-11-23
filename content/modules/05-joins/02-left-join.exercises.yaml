@@ -1,0 +1,21 @@
+- id: joins.left.e1
+  prompt: Show every course's code and its instructor's last name, including courses with no instructor (their last name should be NULL).
+  dataset: school
+  solution: SELECT c.code, i.last_name FROM courses c LEFT JOIN instructors i ON i.id = c.instructor_id;
+  hints:
+    - An inner join drops the course with no instructor.
+
+- id: joins.left.e2
+  prompt: List the first and last names of students who are not enrolled in any course.
+  dataset: school
+  solution: SELECT s.first_name, s.last_name FROM students s LEFT JOIN enrollments e ON e.student_id = s.id WHERE e.student_id IS NULL;
+  hints:
+    - LEFT JOIN enrollments, then keep rows where the enrollment side is NULL.
+
+- id: joins.left.e3
+  prompt: For every course, show its title and the number of students enrolled. Courses with no students should show 0.
+  dataset: school
+  solution: SELECT co.title, COUNT(e.student_id) FROM courses co LEFT JOIN enrollments e ON e.course_id = co.id GROUP BY co.id;
+  hints:
+    - LEFT JOIN keeps courses with no enrollments.
+    - COUNT(*) would count those courses as 1; count a column from enrollments instead.

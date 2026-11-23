@@ -1,0 +1,15 @@
+- id: sorting.order-by.e1
+  prompt: List every product's name and price, from the most expensive to the cheapest.
+  dataset: store
+  solution: SELECT name, price FROM products ORDER BY price DESC;
+  check: { ordered: true }
+  hints:
+    - Most expensive first means descending.
+
+- id: sorting.order-by.e2
+  prompt: List every customer's name and city, sorted by city from A to Z, and then by name from A to Z within each city.
+  dataset: store
+  solution: SELECT name, city FROM customers ORDER BY city, name;
+  check: { ordered: true }
+  hints:
+    - ORDER BY can take two columns, separated by a comma.

@@ -1,0 +1,29 @@
+- id: filtering.patterns-null.e1
+  prompt: Show the code and title of every course whose code starts with `IT`.
+  dataset: school
+  solution: SELECT code, title FROM courses WHERE code LIKE 'IT%';
+  hints:
+    - Use LIKE with a pattern.
+    - "% means \"anything after this\"."
+
+- id: filtering.patterns-null.e2
+  prompt: List the first and last names of students who have no email address.
+  dataset: school
+  solution: SELECT first_name, last_name FROM students WHERE email IS NULL;
+  hints:
+    - A missing email is NULL.
+    - "= NULL never matches; there's a special form for this."
+
+- id: filtering.patterns-null.e3
+  prompt: Show the first name, last name and hired year of instructors hired from 2010 to 2018 (both years included).
+  dataset: school
+  solution: SELECT first_name, last_name, hired_year FROM instructors WHERE hired_year BETWEEN 2010 AND 2018;
+  hints:
+    - BETWEEN includes both ends.
+
+- id: filtering.patterns-null.e4
+  prompt: List the first and last names of students in colleges 2, 3 or 5.
+  dataset: school
+  solution: SELECT first_name, last_name FROM students WHERE college_id IN (2, 3, 5);
+  hints:
+    - IN takes a list of values in parentheses.

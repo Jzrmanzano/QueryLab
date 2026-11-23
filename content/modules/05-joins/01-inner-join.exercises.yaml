@@ -1,0 +1,21 @@
+- id: joins.inner.e1
+  prompt: For every course that has an instructor, show the course code and the instructor's last name.
+  dataset: school
+  solution: SELECT c.code, i.last_name FROM courses c JOIN instructors i ON i.id = c.instructor_id;
+  hints:
+    - courses.instructor_id matches instructors.id.
+
+- id: joins.inner.e2
+  prompt: Show each student's first name together with the code of their college.
+  dataset: school
+  solution: SELECT s.first_name, c.code FROM students s JOIN colleges c ON c.id = s.college_id;
+  hints:
+    - students.college_id matches colleges.id.
+
+- id: joins.inner.e3
+  prompt: For every enrollment, show the student's first name and the title of the course.
+  dataset: school
+  solution: SELECT s.first_name, co.title FROM enrollments e JOIN students s ON s.id = e.student_id JOIN courses co ON co.id = e.course_id;
+  hints:
+    - Start FROM enrollments, then join students and courses.
+    - You need two JOIN clauses.

@@ -1,0 +1,21 @@
+- id: filtering.where.e1
+  prompt: List the first and last names of all fourth-year students (year level 4).
+  dataset: school
+  solution: SELECT first_name, last_name FROM students WHERE year_level = 4;
+  hints:
+    - Filter on the year_level column.
+
+- id: filtering.where.e2
+  prompt: Show the code and title of every course worth more than 3 units.
+  dataset: school
+  solution: SELECT code, title FROM courses WHERE units > 3;
+  hints:
+    - The units column holds the number of units.
+
+- id: filtering.where.e3
+  prompt: List the first and last names of students in college 1 who are in year level 1 or 2.
+  dataset: school
+  solution: SELECT first_name, last_name FROM students WHERE college_id = 1 AND (year_level = 1 OR year_level = 2);
+  hints:
+    - You need AND and OR in the same condition.
+    - Wrap the OR part in parentheses.

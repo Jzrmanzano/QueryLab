@@ -1,0 +1,14 @@
+- id: subqueries.exists-with.e1
+  prompt: List the first and last names of instructors who teach at least one course. Use EXISTS.
+  dataset: school
+  solution: SELECT first_name, last_name FROM instructors i WHERE EXISTS (SELECT 1 FROM courses c WHERE c.instructor_id = i.id);
+  hints:
+    - The subquery looks in courses for a row with this instructor's id.
+
+- id: subqueries.exists-with.e2
+  prompt: Using WITH, count the students in each college, then show the college code and student count for colleges with more than 5 students.
+  dataset: school
+  solution: WITH counts AS (SELECT college_id, COUNT(*) AS n FROM students GROUP BY college_id) SELECT c.code, counts.n FROM counts JOIN colleges c ON c.id = counts.college_id WHERE counts.n > 5;
+  hints:
+    - The CTE groups students by college_id.
+    - The main query joins the CTE to colleges and filters on the count.

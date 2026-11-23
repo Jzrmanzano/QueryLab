@@ -1,0 +1,16 @@
+- id: sorting.limit.e1
+  prompt: Show the name and price of the 3 cheapest products, cheapest first.
+  dataset: store
+  solution: SELECT name, price FROM products ORDER BY price LIMIT 3;
+  check: { ordered: true }
+  hints:
+    - Sort first, then limit.
+
+- id: sorting.limit.e2
+  prompt: Show the id and date of the 5 most recent orders, newest first.
+  dataset: store
+  solution: SELECT id, ordered_on FROM orders ORDER BY ordered_on DESC LIMIT 5;
+  check: { ordered: true }
+  hints:
+    - Dates are stored as text like '2025-06-14', which sorts correctly.
+    - Newest first means descending.

@@ -1,0 +1,20 @@
+- id: aggregates.functions.e1
+  prompt: How many products does the store sell? Return a single number.
+  dataset: store
+  solution: SELECT COUNT(*) FROM products;
+  hints:
+    - COUNT(*) counts rows.
+
+- id: aggregates.functions.e2
+  prompt: What is the average product price? Return a single number.
+  dataset: store
+  solution: SELECT AVG(price) FROM products;
+  hints:
+    - AVG works on a numeric column.
+
+- id: aggregates.functions.e3
+  prompt: Return the lowest and the highest product price, in that order, as two columns.
+  dataset: store
+  solution: SELECT MIN(price), MAX(price) FROM products;
+  hints:
+    - You can use two aggregate functions in one SELECT.

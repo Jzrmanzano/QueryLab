@@ -1,0 +1,14 @@
+- id: subqueries.basics.e1
+  prompt: List the first and last names of students enrolled in the course titled `Database Systems`.
+  dataset: school
+  solution: SELECT first_name, last_name FROM students WHERE id IN (SELECT student_id FROM enrollments WHERE course_id = (SELECT id FROM courses WHERE title = 'Database Systems'));
+  hints:
+    - First find the course id from its title.
+    - Then find the student ids in enrollments for that course.
+
+- id: subqueries.basics.e2
+  prompt: Show the first name and birth year of students born before the average birth year of all students.
+  dataset: school
+  solution: SELECT first_name, birth_year FROM students WHERE birth_year < (SELECT AVG(birth_year) FROM students);
+  hints:
+    - Compare birth_year with a subquery that returns one value.

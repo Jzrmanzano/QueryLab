@@ -1,0 +1,21 @@
+- id: aggregates.group-by.e1
+  prompt: For each product category, show the category and how many products it has.
+  dataset: store
+  solution: SELECT category, COUNT(*) FROM products GROUP BY category;
+  hints:
+    - Group by the category column.
+
+- id: aggregates.group-by.e2
+  prompt: For each order status, show the status and the number of orders with that status.
+  dataset: store
+  solution: SELECT status, COUNT(*) FROM orders GROUP BY status;
+  hints:
+    - Same pattern as the last exercise, on the orders table.
+
+- id: aggregates.group-by.e3
+  prompt: Show the customer_id and order count of every customer who placed more than 3 orders.
+  dataset: store
+  solution: SELECT customer_id, COUNT(*) FROM orders GROUP BY customer_id HAVING COUNT(*) > 3;
+  hints:
+    - Group by customer_id.
+    - Filtering on a COUNT needs HAVING, not WHERE.

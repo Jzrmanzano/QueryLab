@@ -1,0 +1,16 @@
+- id: select.first-query.e1
+  prompt: List every student's first name and last name.
+  dataset: school
+  starter: "SELECT "
+  solution: SELECT first_name, last_name FROM students;
+  hints:
+    - Both columns are in the students table.
+    - Separate the two column names with a comma.
+
+- id: select.first-query.e2
+  prompt: Show every column of the courses table.
+  dataset: school
+  starter: "SELECT "
+  solution: SELECT * FROM courses;
+  hints:
+    - There's a shortcut that means "all columns".

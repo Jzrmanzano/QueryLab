@@ -1,0 +1,24 @@
+- id: select.aliases-distinct.e1
+  prompt: List each course's code and title, naming the columns `course` and `name`.
+  dataset: school
+  solution: SELECT code AS course, title AS name FROM courses;
+  check: { columnNames: true }
+  hints:
+    - Put AS and the new name right after each column.
+
+- id: select.aliases-distinct.e2
+  prompt: Show each year level that has students in it, listing each level only once.
+  dataset: school
+  solution: SELECT DISTINCT year_level FROM students;
+  hints:
+    - The year_level column is in students.
+    - One keyword after SELECT removes duplicates.
+
+- id: select.aliases-distinct.e3
+  prompt: Show each student's last name and their age at the end of 2026, in a column named `age`.
+  dataset: school
+  solution: SELECT last_name, 2026 - birth_year AS age FROM students;
+  check: { columnNames: true }
+  hints:
+    - Age is 2026 minus birth_year.
+    - Name the calculated column with AS age.
