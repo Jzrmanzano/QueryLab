@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { KeyBadges } from '../components/SchemaPanel';
 import { lessonPath, lessons } from '../content/loader';
+import { DATASETS } from '../content/datasets';
 import { getSchema } from '../engine/client';
 import { highlightSql } from '../lib/highlight';
 import type { ColumnSchema, TableSchema } from '../engine/core';
@@ -69,19 +70,6 @@ function Snippet({ children }: { children: string }) {
 }
 
 // ---------- dataset explorer: real tables, keys and links, loaded when opened ----------
-
-const DATASETS = [
-  {
-    id: 'school',
-    blurb: 'A university: colleges, instructors, courses, students, and which students take which courses.',
-  },
-  { id: 'store', blurb: 'An electronics shop: customers, products, orders, and the items in each order.' },
-  {
-    id: 'chinook',
-    blurb: 'A digital music store with 11 tables: artists, albums, tracks, playlists, customers, invoices and employees.',
-  },
-  { id: 'penguins', blurb: 'One table of 344 penguins. Nothing to join, which makes it ideal for filtering and aggregates.' },
-];
 
 function DatasetDetails({ schema }: { schema: TableSchema[] }) {
   const links = schema.flatMap((t) =>

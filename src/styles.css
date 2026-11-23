@@ -342,17 +342,63 @@ select, input { font: inherit; padding: 6px 10px; border: 2px solid var(--ink); 
 .hint { margin: 0; padding: 4px 10px; background: rgba(31, 47, 134, 0.08); border-radius: 4px; }
 .pager { display: flex; justify-content: space-between; gap: 16px; padding-top: calc(var(--lh) * 2); font-weight: 700; }
 
-/* ---------- landing ---------- */
-.landing { display: grid; grid-template-columns: minmax(0, 46rem) minmax(0, 1fr); gap: 28px; max-width: var(--frame); margin: 0 auto; align-items: start; }
-.landing .page { margin: 0; max-width: none; }
-.landing .page h1 { font-size: 3.5rem; line-height: 70px; max-width: 13ch; text-underline-offset: 14px; }
-.landing .actions { padding-bottom: var(--lh); }
-.hero-screen { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 12px; }
-.hero-screen h2 { font-size: 1.0625rem; color: var(--screen-soft); font-weight: 700; }
+/* ---------- home: a real exercise, the real data, and the course ---------- */
+/* Three objects on the desk: the pad and a screen side by side, a wide screen of data, then the course on a
+   wide sheet. The desk shows between them. */
+.home { display: grid; gap: 40px; max-width: var(--frame); margin: 0 auto; }
+/* The exercise is the point of the hero, so the screen gets most of the width. */
+.home-hero { display: grid; grid-template-columns: minmax(0, clamp(31rem, 38vw, 36rem)) minmax(0, 1fr); gap: 28px; align-items: stretch; }
+.home-hero .page { margin: 0; max-width: none; }
+.home-hero h1 { font-size: 2.875rem; line-height: 56px; max-width: none; text-underline-offset: 12px; }
+.home-hero .actions { padding-bottom: var(--lh); }
+.try-it { display: flex; flex-direction: column; }
+.try-it .workspace { flex: 1; }
+.try-it .tab-body > .grid-wrap { max-height: 16rem; }
+
+/* The data browser: the datasets down the left, a real query and its result on the right. */
+.data-browser { display: grid; grid-template-columns: minmax(0, 26rem) minmax(0, 1fr); gap: 20px 40px; padding: 28px; align-items: start; }
+.data-intro h2 { font-size: 1.75rem; line-height: 1.2; letter-spacing: -0.01em; color: var(--screen-text); }
+.data-intro > p { margin: 8px 0 18px; color: var(--screen-soft); }
+.dataset-tabs { display: grid; gap: 6px; }
+.dataset-tab {
+  display: grid; gap: 2px; padding: 10px 14px; text-align: left; cursor: pointer;
+  border: 1px solid transparent; border-radius: 8px; background: none; color: var(--screen-soft); font: 0.9375rem/1.45 var(--sans);
+}
+.dataset-tab code { font: 700 0.9375rem var(--mono); color: var(--screen-text); }
+.dataset-tab:hover { background: var(--hover); }
+.dataset-tab[aria-selected='true'] { background: var(--screen-deep); border-color: var(--screen-line); box-shadow: inset 3px 0 0 var(--pad); color: var(--screen-text); }
+.dataset-tab[aria-selected='true'] code { color: var(--pad); }
+.data-sample { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-width: 0; }
+.data-sample pre {
+  align-self: stretch; margin: 0; padding: 14px 18px; overflow-x: auto;
+  background: var(--screen-deep); border: 1px solid var(--screen-line); border-radius: 10px; color: var(--screen-text); font-size: 0.9375rem; line-height: 1.6;
+}
+.data-sample .grid-wrap { align-self: stretch; }
+.data-sample > :is(.grid-wrap, .placeholder, .error) { min-height: 15rem; align-self: stretch; } /* no jump while a dataset loads */
+.data-sample .meta { margin: 0; }
+
+/* The course as a contents page: module numbers in the margin, each module on its ruled line. */
+.course-sheet { margin: 0; max-width: none; }
+.page .sheet-title {
+  font-size: 2.25rem; line-height: 44px; letter-spacing: -0.02em; margin: 0 0 var(--lh);
+  text-decoration: underline; text-decoration-color: var(--margin); text-decoration-thickness: 3px; text-underline-offset: 10px;
+}
+.syllabus { list-style: none; margin: 0; padding: 0; }
+.syllabus > li {
+  display: grid; grid-template-columns: minmax(0, 17rem) minmax(0, 1fr) auto; column-gap: var(--col-gap); align-items: start;
+  padding-bottom: calc(var(--lh) / 2); line-height: var(--lh);
+  background-image: linear-gradient(to bottom, transparent calc(var(--lh) - 1px), var(--rule) calc(var(--lh) - 1px));
+  background-size: 100% var(--lh);
+}
+.syllabus > li > .mark { font-size: 1.1875rem; color: var(--ink); top: 0; }
+.syllabus h3 { font-size: 1.1875rem; line-height: var(--lh); }
+.syllabus h3 a { text-decoration: none; }
+.syllabus h3 a:hover { text-decoration: underline; }
+.syllabus p { margin: 0; max-width: 40rem; color: var(--ink-soft); }
+.syllabus .count { white-space: nowrap; }
 
 /* ---------- lessons: the course as a table of contents ---------- */
 .toc { list-style: none; margin: var(--lh) 0 0; padding: 0; }
-.page > h2 + .toc { margin-top: 0; }
 /* Every entry is a whole number of ruled lines, so it carries the pad's rules too. */
 .toc > li {
   padding-bottom: var(--lh);
@@ -474,11 +520,13 @@ select, input { font: inherit; padding: 6px 10px; border: 2px solid var(--ink); 
 
 /* ---------- responsive ---------- */
 @media (max-width: 1080px) {
-  .lesson-layout, .landing { grid-template-columns: minmax(0, 1fr); }
-  .lesson-workspace, .hero-screen { position: static; height: auto; min-height: 0; }
+  .lesson-layout, .home-hero, .data-browser { grid-template-columns: minmax(0, 1fr); }
+  .lesson-workspace { position: static; height: auto; min-height: 0; }
 }
 @media (max-width: 900px) {
   .course > li { grid-template-columns: minmax(0, 1fr); }
+  .syllabus > li { grid-template-columns: minmax(0, 1fr) auto; }
+  .syllabus p { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (max-width: 640px) {
   :root { --gutter: 40px; --gap: 12px; }
@@ -493,7 +541,9 @@ select, input { font: inherit; padding: 6px 10px; border: 2px solid var(--ink); 
   .editor-bar .spacer { display: none; }
   .solved-count { font-size: 0.875rem; }
   .page, .lesson { padding: 24px 16px 40px calc(var(--gutter) + var(--gap)); }
-  .page h1, .lesson h1, .landing .page h1 { font-size: 2.125rem; line-height: 42px; text-underline-offset: 9px; }
+  .page h1, .lesson h1, .home-hero h1 { font-size: 2.125rem; line-height: 42px; text-underline-offset: 9px; }
+  .page .sheet-title { font-size: 1.75rem; line-height: 36px; }
+  .data-browser { padding: 16px; }
   .mark { width: 26px; height: 26px; font-size: 0.8125rem; }
   .mark svg { width: 22px; height: 22px; }
   .screen { padding: 12px; border-radius: 12px; }
