@@ -87,3 +87,9 @@ export function insertIntoEditor(container: HTMLElement | null, text: string) {
   v.dispatch(v.state.replaceSelection(text));
   v.focus();
 }
+
+/** Puts the cursor back in the editor inside `container`. */
+export function focusEditor(container: HTMLElement | null) {
+  const el = container?.querySelector('.cm-editor');
+  (el ? EditorView.findFromDOM(el as HTMLElement) : null)?.focus();
+}

@@ -27,7 +27,7 @@ export function Playground() {
           </select>
         </label>
       </div>
-      <Workspace datasetId={dataset} value={sql} onChange={setSql} />
+      <Workspace datasetId={dataset} value={sql} onChange={setSql} clearable />
     </div>
   );
 }
